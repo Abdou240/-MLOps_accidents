@@ -1,10 +1,8 @@
-Project Name
-==============================
+# Project Name
 
 This project is a starting Pack for MLOps projects based on the subject "road accident". It's not perfect so feel free to make some modifications on it.
 
-Project Organization
-------------
+## Project Organization
 
     ├── LICENSE
     ├── README.md          <- The top-level README for developers using this project.
@@ -34,8 +32,8 @@ Project Organization
     │   ├── __init__.py    <- Makes src a Python module
     │   │
     │   ├── data           <- Scripts to download or generate data
-    │   │   ├── check_structure.py    
-    │   │   ├── import_raw_data.py 
+    │   │   ├── check_structure.py
+    │   │   ├── import_raw_data.py
     │   │   └── make_dataset.py
     │   │
     │   ├── features       <- Scripts to turn raw data into features for modeling
@@ -50,48 +48,46 @@ Project Organization
     │   │   └── visualize.py
     │   └── config         <- Describe the parameters used in train_model.py and predict_model.py
 
----------
+---
 
-## Steps to follow 
+## Steps to follow
 
 Convention : All python scripts must be run from the root specifying the relative file path.
 
 ### 1- Create a virtual environment using Virtualenv.
 
-    `python -m venv my_env`
+    `python3 -m venv my_env`
 
-###   Activate it 
+### Activate it
 
     `./my_env/Scripts/activate`
 
-###   Install the packages from requirements.txt
+### Install the packages from requirements.txt
 
     `pip install -r ./requirements.txt` ### You will have an error in "setup.py" but this won't interfere with the rest
 
 ### 2- Execute import_raw_data.py to import the 4 datasets.
 
-    `python ./src/data/import_raw_data.py` ### It will ask you to create a new folder, accept it.
+    `python3 ./src/data/import_raw_data.py` ### It will ask you to create a new folder, accept it.
 
 ### 3- Execute make_dataset.py initializing `./data/raw` as input file path and `./data/preprocessed` as output file path.
 
-    `python ./src/data/make_dataset.py`
+    `python3 ./src/data/make_dataset.py`
 
 ### 4- Execute train_model.py to instanciate the model in joblib format
 
-    `python ./src/models/train_model.py`
+    `python3 ./src/models/train_model.py`
 
 ### 5- Finally, execute predict_model.py with respect to one of these rules :
-  
-  - Provide a json file as follow : 
 
-    
-    `python ./src/models/predict_model.py ./src/models/test_features.json`
+- Provide a json file as follow :
 
-  test_features.json is an example that you can try 
+  `python3 ./src/models/predict_model.py ./src/models/test_features.json`
 
-  - If you do not specify a json file, you will be asked to enter manually each feature. 
+test_features.json is an example that you can try
 
+- If you do not specify a json file, you will be asked to enter manually each feature.
 
-------------------------
+---
 
 <p><small>Project based on the <a target="_blank" href="https://drivendata.github.io/cookiecutter-data-science/">cookiecutter data science project template</a>. #cookiecutterdatascience</small></p>
