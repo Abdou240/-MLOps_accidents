@@ -108,6 +108,9 @@ def process_data(input_filepath_users, input_filepath_caract, input_filepath_pla
     col_to_drop_lines = ['catv', 'vma', 'secu1', 'obsm', 'atm']
     df = df.dropna(subset = col_to_drop_lines, axis=0)
 
+   #--Filling NaN values
+    col_to_fill_na = ["surf", "circ", "col", "motor"]
+    df[col_to_fill_na] = df[col_to_fill_na].fillna(df[col_to_fill_na].mode().iloc[0])
 
     target = df['grav']
     feats = df.drop(['grav'], axis = 1)
@@ -115,16 +118,16 @@ def process_data(input_filepath_users, input_filepath_caract, input_filepath_pla
     X_train, X_test, y_train, y_test = train_test_split(feats, target, test_size=0.3, random_state = 42)
 
     #--Filling NaN values
-    col_to_fill_na = ["surf", "circ", "col", "motor"]
-    X_train[col_to_fill_na] = X_train[col_to_fill_na].fillna(X_train[col_to_fill_na].mode().iloc[0])
-    X_test[col_to_fill_na] = X_test[col_to_fill_na].fillna(X_train[col_to_fill_na].mode().iloc[0])
+    # col_to_fill_na = ["surf", "circ", "col", "motor"]
+    # X_train[col_to_fill_na] = X_train[col_to_fill_na].fillna(X_train[col_to_fill_na].mode().iloc[0])
+    # X_test[col_to_fill_na] = X_test[col_to_fill_na].fillna(X_train[col_to_fill_na].mode().iloc[0])
 
     # Create folder if necessary 
     if check_existing_folder(output_folderpath) :
         os.makedirs(output_folderpath)
 
     #--Saving the dataframes to their respective output file paths
-    for file, filename in zip([X_train, X_test, y_train, y_test], ['X_train', 'X_test', 'y_train', 'y_test']):
+    for file, filename in zip([X_train, X_test, y_train, y_test, df], ['X_train', 'X_test', 'y_train', 'y_test', 'dataset']):
         output_filepath = os.path.join(output_folderpath, f'{filename}.csv')
         if check_existing_file(output_filepath):
             file.to_csv(output_filepath, index=False)
