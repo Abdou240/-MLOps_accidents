@@ -66,6 +66,9 @@ target/
 *.db
 *.rdb
 
+# config File for PostgreSQL
+config.py
+
 # Pycharm
 .idea
 
