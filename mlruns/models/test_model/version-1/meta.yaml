@@ -1,0 +1,14 @@
+aliases: []
+creation_timestamp: 1709120560474
+current_stage: None
+description: ''
+last_updated_timestamp: 1709120560474
+name: test_model
+run_id: a98bbbd5944749cb86a4bd234a57ae60
+run_link: ''
+source: file:///home/ortegamo/Daniel/Personal/jobsuche/courses/MLops/final_project/MLOps_accidents/mlruns/950173504043555393/a98bbbd5944749cb86a4bd234a57ae60/artifacts/rf_car_accidents
+status: READY
+status_message: null
+storage_location: file:///home/ortegamo/Daniel/Personal/jobsuche/courses/MLops/final_project/MLOps_accidents/mlruns/950173504043555393/a98bbbd5944749cb86a4bd234a57ae60/artifacts/rf_car_accidents
+user_id: null
+version: 1
