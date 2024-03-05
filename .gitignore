@@ -95,3 +95,6 @@ target/
 
 # mlruns
 # mlruns/
+env_mlflow/
+commands.txt
+model_requirements.txt
