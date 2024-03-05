@@ -1,0 +1,8 @@
+version: '3.9'
+services:
+  api_service:
+    image:  danielggm/accidents_model_server:latest
+    container_name: model_server
+    ports: 
+      - target: 8080
+        published: 5000
