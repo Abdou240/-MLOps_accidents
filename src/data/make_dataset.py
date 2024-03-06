@@ -56,6 +56,7 @@ def process_data(input_filepath_users, input_filepath_caract, input_filepath_pla
 
     #--Replacing names 
     # --- START CHANGE ----
+    df_users.catu-=1
     df_users.grav.replace([1,2,3,4], [1,4,3,2], inplace = True)
     # --- END CHANGE ----
     df_caract.rename({"agg" : "agg_"},  inplace = True, axis = 1)
@@ -86,9 +87,9 @@ def process_data(input_filepath_users, input_filepath_caract, input_filepath_pla
     # 7-delete - Dazzling weather
     # 8:0 - Cloudy weather
     # 9-delete - Other
-    # normal/, rain/strom, snow/hail, fog/smoke
+    # normal, rain/strom, snow/hail, fog/smoke
 
-    dico = {1:0, 2:1, 3:1, 4:2, 5:3, 6:1, 7:-1, 8:0, 9:-1}
+    dico = {1:0, 2:1, 3:1, 4:2, 5:3, 6:1, 7:-1, 8:-1, 9:-1}
     df_caract["atm"] = df_caract["atm"].replace(dico) 
 
     # --- END CHANGE ----
@@ -160,14 +161,12 @@ def process_data(input_filepath_users, input_filepath_caract, input_filepath_pla
     
     df['victim_age'] = df['victim_age'].round().astype('int64')
 
-    # for k in ['catu', 'victim_age', 'lum', 'com', 'atm', 'grav']:
-    #     print(k, set(df[k]))
     #print(df.columns)
     # --- END CHANGE ----
 
     target = df['grav']
     feats = df.drop(['grav'], axis = 1)
-
+    
     X_train, X_test, y_train, y_test = train_test_split(feats, target, test_size=0.3, random_state = 42)
 
     #--Filling NaN values

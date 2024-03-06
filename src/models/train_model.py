@@ -20,11 +20,11 @@ y_test = pd.read_csv('data/preprocessed/y_test.csv')
 y_train = np.ravel(y_train)
 y_test = np.ravel(y_test)
 
-
+estimators = 50
 
 # Train model
 params = {
-    "n_estimators": 50,
+    "n_estimators": estimators,
     "max_depth": 10,
     "random_state": 42,
     "n_jobs": -1,
@@ -36,7 +36,7 @@ rf_classifier = ensemble.RandomForestClassifier(**params)
 rf_classifier.fit(X_train, y_train)
 
 #--Save the trained model to a file
-model_filename = './src/models/trained_model.joblib'
+model_filename = './src/models/trained_model_'+str(estimators)+'_estimators.joblib'
 joblib.dump(rf_classifier, model_filename)
 print("Model trained and saved successfully.")
 
@@ -59,7 +59,7 @@ client = MlflowClient(tracking_uri="http://127.0.0.1:9090")
 
 # Define experiment name, run name and artifact_path name
 car_accidents_experiment = mlflow.set_experiment("car_accidents")
-run_name = "second_run"
+run_name = "run_with_"+str(estimators)+"_estimators"
 artifact_path = "rf_car_accidents"
 
 # Store information in tracking server
