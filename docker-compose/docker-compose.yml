@@ -1,0 +1,15 @@
+version: '3.9'
+services:
+  api_service:
+    image:  danielggm/accidents_model_server
+    container_name: my_api
+    ports: 
+      - target: 8000
+        published: 8000
+  
+networks:
+  my_network:  
+    ipam:
+      config:
+        - subnet: 172.50.0.0/16
+          gateway: 172.50.0.1

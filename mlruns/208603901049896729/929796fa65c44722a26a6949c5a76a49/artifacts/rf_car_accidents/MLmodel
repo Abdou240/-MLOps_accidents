@@ -1,0 +1,31 @@
+artifact_path: rf_car_accidents
+flavors:
+  python_function:
+    env:
+      conda: conda.yaml
+      virtualenv: python_env.yaml
+    loader_module: mlflow.sklearn
+    model_path: model.pkl
+    predict_fn: predict
+    python_version: 3.10.10
+  sklearn:
+    code: null
+    pickled_model: model.pkl
+    serialization_format: cloudpickle
+    sklearn_version: 1.4.1.post1
+mlflow_version: 2.11.0
+model_size_bytes: 7255665
+model_uuid: b57a1942b8c6414a921bebc00a11b16e
+run_id: 929796fa65c44722a26a6949c5a76a49
+saved_input_example_info:
+  artifact_path: input_example.json
+  pandas_orient: split
+  type: dataframe
+signature:
+  inputs: '[{"type": "long", "name": "catu", "required": true}, {"type": "long", "name":
+    "victim_age", "required": true}, {"type": "long", "name": "lum", "required": true},
+    {"type": "long", "name": "com", "required": true}, {"type": "long", "name": "atm",
+    "required": true}]'
+  outputs: '[{"type": "long", "required": true}]'
+  params: null
+utc_time_created: '2024-03-06 13:58:24.271267'

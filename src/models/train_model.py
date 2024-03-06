@@ -24,7 +24,7 @@ y_test = np.ravel(y_test)
 
 # Train model
 params = {
-    "n_estimators": 100,
+    "n_estimators": 50,
     "max_depth": 10,
     "random_state": 42,
     "n_jobs": -1,
@@ -43,9 +43,9 @@ print("Model trained and saved successfully.")
 # Evaluate model
 y_pred = rf_classifier.predict(X_test)
 accuracy = accuracy_score(y_test, y_pred)
-precision = precision_score(y_test, y_pred)
-recall = recall_score(y_test, y_pred)
-f1 = f1_score(y_test, y_pred)
+precision = precision_score(y_test, y_pred, average='macro')
+recall = recall_score(y_test, y_pred, average='macro')
+f1 = f1_score(y_test, y_pred, average='macro')
 metrics = {"accuracy": accuracy, 
            "precision": precision, 
            "recall": recall, 

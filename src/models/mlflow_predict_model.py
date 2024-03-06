@@ -9,7 +9,7 @@ loaded_model = joblib.load("./src/models/trained_model.joblib")
 
 def predict_model(features):
     input_df = pd.DataFrame([features])
-    print(input_df)
+    #print(input_df)
     prediction = loaded_model.predict(input_df)
     return prediction
 
@@ -21,7 +21,7 @@ def get_feature_values_manually(feature_names):
     return features
 
 if __name__ == "__main__":
-    print(len(sys.argv))
+    #print(len(sys.argv))
     if len(sys.argv) == 2:
         json_file = sys.argv[1]
         with open(json_file, 'r') as file:
@@ -51,7 +51,7 @@ if __name__ == "__main__":
         #print('mlflow_features', mlflow_features)
 
         import mlflow
-        logged_model = 'runs:/a98bbbd5944749cb86a4bd234a57ae60/rf_car_accidents'
+        logged_model = 'runs:/913ea6af6bc14a959672793d892423e8/rf_car_accidents'
 
         # Load model as a PyFuncModel.
         loaded_model_mlflow = mlflow.pyfunc.load_model(logged_model)
@@ -67,9 +67,9 @@ if __name__ == "__main__":
         #df['victim_age'] = np.float32(df['victim_age'])
         #print(df['victim_age'])
         input_df = pd.DataFrame([mlflow_features])
-        print(input_df)
+        #print(input_df)
         x = loaded_model_mlflow.predict(input_df)
-        print('MLflow prediction', x)
+        #print('MLflow prediction', x)
 
     else:
         X_train = pd.read_csv("data/preprocessed/X_train.csv")
