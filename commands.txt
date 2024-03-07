@@ -1,0 +1,5 @@
+
+
+# To create mlflow server image
+
+docker build -f Dockerfile.mlfow_server . -t mlflow_server:latest
