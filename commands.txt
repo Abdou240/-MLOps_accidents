@@ -1,0 +1,7 @@
+
+
+# To create mlflow server image
+docker build -f Dockerfile.mlfow_server . -t mlflow_server:latest
+
+# To run docker compose
+docker-compose -f docker-compose/docker-compose.yml up --remove-orphans
