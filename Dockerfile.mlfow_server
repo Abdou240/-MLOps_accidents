@@ -30,7 +30,7 @@ EXPOSE ${SERVER_PORT}/tcp
 
 #VOLUME ["${MLFLOW_HOME}/scripts/", "${FILE_STORE}", "${ARTIFACT_STORE}"]
 
-ADD ./../../mlruns "${MLFLOW_HOME}/mlruns"
+ADD mlruns "${MLFLOW_HOME}/mlruns"
 
 WORKDIR ${MLFLOW_HOME}
 

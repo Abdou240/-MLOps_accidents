@@ -1,3 +1,28 @@
+# To create mlflow server image
+docker build -f Dockerfile.mlfow_server . -t mlflow_server:latest
+
+# To run docker compose
+docker-compose -f docker-compose/docker-compose.yml up --remove-orphans
+
+# remove all containers
+docker ps -qa {docker container rm -f}
+docker rm $(docker ps -aq)
+
+# remove everthing from docker (clean)
+docker system  prune -a
+
+# Create MLflow env
+
+virtualenv env_mlflow
+source env_mlflow/bin/activate
+pip3 install mlflow
+mlflow models build-docker --name general_model_server
+
+
+
+
+
+
 source env_mlflow/bin/activate
 
 # Docker container
@@ -32,4 +57,6 @@ docker run --rm -p 5001:5001 -v /home/ubuntu/MLOps_Accidents/mlruns/950173504043
 
 
 curl http://127.0.0.2:8080/ -H 'Content-Type: application/json' -d '{}'
+
+
 

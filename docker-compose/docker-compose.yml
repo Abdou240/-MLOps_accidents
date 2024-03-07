@@ -1,15 +1,22 @@
 version: '3.9'
 services:
-  api_service:
-    image:  danielggm/accidents_model_server
-    container_name: my_api
+  model_service:
+    image:  danielggm/accidents_model_server:latest
+    #image: general_model_server:latest
+    container_name: model_server
+    ports: 
+      - target: 8080
+        published: 8080
+    # volumes:
+      # - /home/ubuntu/MLOps_Accidents/mlruns/540651655119660427/7f767bc02a17493e95921b6f2bcebcf0/artifacts/rf_car_accidents/:/opt/ml/model
+
+  mlflow_service:
+    image:  mlflow_server:latest
+    container_name: mlflow_server
     ports: 
       - target: 8000
         published: 8000
-  
-networks:
-  my_network:  
-    ipam:
-      config:
-        - subnet: 172.50.0.0/16
-          gateway: 172.50.0.1
+    command: mlflow server --host 0.0.0.0 --port 8000
+    depends_on:
+      - model_service
+    
