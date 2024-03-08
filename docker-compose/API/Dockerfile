@@ -12,4 +12,4 @@ ADD unique_loc.csv /my_api/unique_loc.csv
 WORKDIR /my_api/
 ENV LC_CTYPE=UTF-8 LC_ALL=C.UTF-8 LANG=C.UTF-8
 EXPOSE 8000
-CMD uvicorn api:app
+CMD ["uvicorn", "api:app", "--host", "0.0.0.0", "--port", "80"]

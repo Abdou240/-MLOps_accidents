@@ -7,7 +7,8 @@ from fastapi import FastAPI, Body, Request
 
 app = FastAPI()
 file = open("./unique_loc.csv", "r")
-locations = [x[0] for x in list(csv.reader(file, delimiter=","))]
+locations = [x[1] for x in list(csv.reader(file, delimiter=","))]
+del locations[0]
 file.close()
 # loaded_model = joblib.load("../src/models/trained_model.joblib")
 
@@ -61,17 +62,21 @@ file.close()
 # General users endpoints
 
 @app.get("/gen_user/risky_locations")
-def risky_locations(request: Request):
-	feature_list = [{request.json().update({'com': mun})} for mun in locations]
+async def risky_locations(request: Request):
+	features = await request.json()
+	feature_list = [dict({'com': mun}, **features) for mun in locations]
 	res = requests.post('http://model:8080/invocations', json={'dataframe_records': feature_list})
-	return res.json()
+	pred = res.json()['predictions']
+	idx = sorted(range(len(pred)), key=lambda i: pred[i])[-10:]
+	return {'locations': [locations[i] for i in idx], 'predictions': [pred[i] for i in idx]}
 	# TODO return top 10 risky locations after querying the model with loads of predictions
 
 @app.get("/gen_user/query_location")
 async def query_location(request: Request):
 	features = await request.json()
 	res = requests.post('http://model:8080/invocations', json={'dataframe_records': [features]})
-	return res.json()
+	pred = res.json()['predictions'][0]
+	return pred
 	# TODO return info on riskyness of this location by querying model container with loads of predictions about this location
 
 @app.get("/status")
@@ -83,4 +88,5 @@ def test():
 async def test():
 	features = {'catu': 0, 'victim_age': 10, 'lum': 0, 'com': 77317, 'atm': 0}
 	res = requests.post('http://model:8080/invocations', json={'dataframe_records': [features]})
-	return res.json()
+	pred = res.json()['predictions'][0]
+	return pred
