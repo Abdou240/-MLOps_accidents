@@ -1,0 +1,31 @@
+version: '3.9'
+services:
+  model:
+    image: danielggm/accidents_model_server:latest
+    container_name: model
+    networks:
+      - api_net
+    ports:
+      - '8080:8080'
+  api:
+    image: project_api:latest
+    container_name: api
+    networks:
+      - api_net
+    ports:
+      - "8000:8000"
+    expose:
+      - 8000
+    depends_on:
+      - model
+  streamlit:
+    image: project_streamlit:latest
+    container_name: streamlit
+    networks:
+      - api_net
+    ports:
+      - "8501:8501"
+    depends_on:
+      - api
+networks:
+  api_net:
