@@ -19,6 +19,7 @@ pip3 install mlflow
 mlflow models build-docker --name general_model_server
 
 
+curl http://127.0.0.1:8080/invocations -H 'Content-Type: application/json' -d '{"dataframe_records": [{"catu": 3, "victim_age" : 60, "lum" : 5, "com" : 77317, "atm" : 0}]}'
 
 
 
