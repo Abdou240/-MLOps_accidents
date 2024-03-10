@@ -11,5 +11,5 @@ ADD main.py /my_api/api.py
 ADD unique_loc.csv /my_api/unique_loc.csv
 WORKDIR /my_api/
 ENV LC_CTYPE=UTF-8 LC_ALL=C.UTF-8 LANG=C.UTF-8
-EXPOSE 8000
-CMD ["uvicorn", "api:app", "--host", "0.0.0.0", "--port", "80"]
+EXPOSE 8090
+CMD ["uvicorn", "api:app", "--host", "0.0.0.0", "--port", "8090"]

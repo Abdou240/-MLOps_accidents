@@ -32,24 +32,27 @@ class PredProgress:
 		self.bar = st.progress(self.progress, text=self.txt)
 
 if endpoint == '/status':
-	res = requests.get(f'http://api:80{endpoint}')
+	res = requests.get(f'http://api:8090{endpoint}')
 	st.write(res.json())
 
 if endpoint == '/model_status':
-	res = requests.get(f'http://api:80{endpoint}')
+	res = requests.get(f'http://api:8090{endpoint}')
+	st.write(res.json())
+
 	colors = ['green', 'yellow', 'red', 'black']
 	pred = res.json()
+	print(res.json())
 
 	st.markdown(
-    f"""
-    <style>
-        .stProgress > div > div > div > div {{
-			background-color: {colors[pred]};
+	f"""
+	<style>
+		.stProgress > div > div > div > div {{
+			background-color: {colors[pred['predictions'][0]]};
 		}}
-    </style>""",
-    unsafe_allow_html=True,
+	</style>""",
+	unsafe_allow_html=True,
 	)
-	progress = PredProgress(pred)
+	progress = PredProgress(pred['predictions'][0])
 
 if endpoint == '/gen_user/query_location':
 	col1, col2, col3, col4, col5 = st.columns(5)
@@ -62,7 +65,7 @@ if endpoint == '/gen_user/query_location':
 	search = st.button('Search')
 	res = None
 	if search:
-		res = requests.get(f'http://api:80{endpoint}', json=features)
+		res = requests.get(f'http://api:8090{endpoint}', json=features)
 	if res:
 		st.write(res.json())
 
@@ -76,6 +79,6 @@ if endpoint == '/gen_user/risky_locations':
 	search = st.button('Search')
 	res = None
 	if search:
-		res = requests.get(f'http://api:80{endpoint}', json=features)
+		res = requests.get(f'http://api:8090{endpoint}', json=features)
 	if res:
 		st.write(res.json())
