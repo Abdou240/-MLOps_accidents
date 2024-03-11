@@ -1,0 +1,63 @@
+# To create mlflow server image
+docker build -f Dockerfile.mlfow_server . -t mlflow_server:latest
+
+# To run docker compose
+docker-compose -f docker-compose/docker-compose.yml up --remove-orphans
+
+# remove all containers
+docker ps -qa {docker container rm -f}
+docker rm $(docker ps -aq)
+
+# remove everthing from docker (clean)
+docker system  prune -a
+
+# Create MLflow env
+
+virtualenv env_mlflow
+source env_mlflow/bin/activate
+pip3 install mlflow
+mlflow models build-docker --name general_model_server
+
+
+curl http://127.0.0.1:8080/invocations -H 'Content-Type: application/json' -d '{"dataframe_records": [{"catu": 3, "victim_age" : 60, "lum" : 5, "com" : 77317, "atm" : 0}]}'
+
+
+
+
+source env_mlflow/bin/activate
+
+# Docker container
+
+docker run --rm -v /home/ubuntu/MLOps_Accidents/mlruns/950173504043555393/a98bbbd5944749cb86a4bd234a57ae60/artifacts/rf_car_accidents:/opt/ml/model -it general_model_server:latest --install_mlflow --enable_mlserver
+
+docker run --rm -p 5001:5001 -v /home/ubuntu/MLOps_Accidents/mlruns/950173504043555393/a98bbbd5944749cb86a4bd234a57ae60/artifacts/rf_car_accidents:/opt/ml/model -it general_model_server:latest --install_mlflow --enable_mlserver
+
+
+mlflow models build-docker -m 'runs:/e27c0be94b734726a4c0f4cb692e5bc4/rf_apples' -n model_server --enable-mlserver
+source env_mlflow/bin/activate
+mlflow models build-docker -m 'runs:/e27c0be94b734726a4c0f4cb692e5bc4/rf_apples' -n model_server --enable-mlserver
+docker run -p 5001:8000 model_server:latest 
+mlflow models build-docker -m './mlruns/229533642677125516/e27c0be94b734726a4c0f4cb692e5bc4/artifacts/rf_apples' -n model_server_2 --enable-mlserver
+docker run -p 5001:8000 model_server_2:latest 
+pip                                             freeze
+mlflow models build-docker -m './mlruns/229533642677125516/e27c0be94b734726a4c0f4cb692e5bc4/artifacts/rf_apples' -n model_server_3
+mlflow models build-docker -m './mlruns/229533642677125516/e27c0be94b734726a4c0f4cb692e5bc4/artifacts/rf_apples' -n model_server_2 --enable-mlserver --install-mlflow
+mlflow models build-docker --name "model_server_general"
+docker run --rm -p 5001:8080 -v ./mlruns/229533642677125516/e27c0be94b734726a4c0f4cb692e5bc4/artifacts/rf_apples:/opt/ml/model model_server_general:latest
+dockes":/opt/ml/model model_server_general:latest
+docker run --rm -p 5001:8080 -v ./mlruns/229533642677125516/e27c0be94b734726a4c0f4cb692e5bc4/artifacts/rf_apples:/opt/ml/model model_server_general:latest
+docker run --rm -p 5001:8080 -v /home/ubuntu/cloned_mlflow/MLflow/mlruns/229533642677125516/e27c0be94b734726a4c0f4cb692e5bc4/artifacts/rf_apples:/opt/ml/model model_server_general:latest
+docker run --rm -p 5002:8080 -v /home/ubuntu/cloned_mlflow/MLflow/mlruns/229533642677125516/e27c0be94b734726a4c0f4cb692e5bc4/artifacts/rf_apples:/opt/ml/model model_server_general:latest
+mlflow models build-docker --name general_model_server
+source env_mlflow/bin/activate
+mlflow models build-docker --name general_model_server
+docker run --rm
+-p 5001:5001 
+docker run --rm -p 5001:5001 -v /home/ubuntu/MLOps_Accidents/mlruns/950173504043555393/a98bbbd5944749cb86a4bd234a57ae60/artifacts/rf_car_accidents:/opt/ml/model general_model_server:latest
+docker run --rm -p 5001:5001 -v /home/ubuntu/MLOps_Accidents/mlruns/950173504043555393/a98bbbd5944749cb86a4bd234a57ae60/artifacts/rf_car_accidents:/opt/ml/model -it general_model_server:latest 
+
+
+curl http://127.0.0.2:8080/ -H 'Content-Type: application/json' -d '{}'
+
+
+

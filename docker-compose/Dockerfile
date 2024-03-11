@@ -1,6 +1,6 @@
 FROM python:3.10-bookworm
 
-RUN pip3 install requests==2.21.0 streamlit pandas
+RUN pip3 install requests streamlit pandas --progress-bar off
 ADD streamlit.py /ui/streamlit.py
 ADD v_commune_2023.csv /ui/com.csv
 WORKDIR /ui

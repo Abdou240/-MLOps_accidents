@@ -94,3 +94,10 @@ config.py
 # Mypy cache
 .mypy_cache/
 *.joblib
+
+
+# mlruns
+# mlruns/
+env_mlflow/
+commands.txt
+model_requirements.txt

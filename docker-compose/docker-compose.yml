@@ -1,23 +1,41 @@
 version: '3.9'
 services:
   model:
-    image: danielggm/accidents_model_server:latest
+    image:  danielggm/accidents_model_server:latest
+    #image: general_model_server:latest
     container_name: model
     networks:
       - api_net
-    ports:
-      - '8080:8080'
+    ports: 
+      - target: 8080
+        published: 8080
+    # volumes:
+      # - /home/ubuntu/MLOps_Accidents/mlruns/540651655119660427/7f767bc02a17493e95921b6f2bcebcf0/artifacts/rf_car_accidents/:/opt/ml/model
+
+  mlflow:
+    image:  mlflow_server:latest
+    container_name: mlflow
+    ports: 
+      - target: 8000
+        published: 8000
+    command: mlflow server --host 0.0.0.0 --port 8000
+    depends_on:
+      - model
+    networks:
+      - api_net
+
   api:
     image: project_api:latest
     container_name: api
     networks:
       - api_net
     ports:
-      - "8000:8000"
+      - "8090:8090"
     expose:
-      - 8000
+      - 8090
     depends_on:
       - model
+
   streamlit:
     image: project_streamlit:latest
     container_name: streamlit
@@ -27,5 +45,7 @@ services:
       - "8501:8501"
     depends_on:
       - api
+    privileged: true
+    
 networks:
   api_net:

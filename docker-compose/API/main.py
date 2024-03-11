@@ -65,7 +65,9 @@ file.close()
 async def risky_locations(request: Request):
 	features = await request.json()
 	feature_list = [dict({'com': mun}, **features) for mun in locations]
-	res = requests.post('http://model:8080/invocations', json={'dataframe_records': feature_list})
+	res = requests.post('http://model:8080/invocations', 
+						json={'dataframe_records': feature_list},
+						headers={"Content-Type": "application/json"})						
 	pred = res.json()['predictions']
 	idx = sorted(range(len(pred)), key=lambda i: pred[i])[-10:]
 	return {'locations': [locations[i] for i in idx], 'predictions': [pred[i] for i in idx]}
@@ -74,7 +76,9 @@ async def risky_locations(request: Request):
 @app.get("/gen_user/query_location")
 async def query_location(request: Request):
 	features = await request.json()
-	res = requests.post('http://model:8080/invocations', json={'dataframe_records': [features]})
+	res = requests.post('http://model:8080/invocations', 
+						json={'dataframe_records': [features]},
+						headers={"Content-Type": "application/json"})
 	pred = res.json()['predictions'][0]
 	return pred
 	# TODO return info on riskyness of this location by querying model container with loads of predictions about this location
@@ -87,6 +91,19 @@ def test():
 @app.get("/model_status")
 async def test():
 	features = {'catu': 0, 'victim_age': 10, 'lum': 0, 'com': 77317, 'atm': 0}
-	res = requests.post('http://model:8080/invocations', json={'dataframe_records': [features]})
-	pred = res.json()['predictions'][0]
-	return pred
+	
+	res = requests.post('http://model:8080/invocations',  
+						json={'dataframe_records': [features]},
+						 headers={"Content-Type": "application/json"})
+	#print(res.text)
+	#print(res.json())
+	# res = requests.get('http://model:8080/health')
+	# # f'http://api:8090{endpoint}'
+	# print(res, dir(res))
+	# print(res.ok)
+	# print(res.json())
+	# print(res.text)
+	# print(res.status_code)
+	# if res.status_code == 200:
+	# 	return {'Model Status':'Model is running'}
+	return {'predictions':res.json()['predictions']}

@@ -1,0 +1,15 @@
+artifact_uri: file:///home/ortegamo/Daniel/Personal/jobsuche/courses/MLops/final_project/MLOps_accidents/mlruns/540651655119660427/7f767bc02a17493e95921b6f2bcebcf0/artifacts
+end_time: 1709743596524
+entry_point_name: ''
+experiment_id: '540651655119660427'
+lifecycle_stage: active
+run_id: 7f767bc02a17493e95921b6f2bcebcf0
+run_name: run_with_100_estimators
+run_uuid: 7f767bc02a17493e95921b6f2bcebcf0
+source_name: ''
+source_type: 4
+source_version: ''
+start_time: 1709743592861
+status: 3
+tags: []
+user_id: ortegamo
