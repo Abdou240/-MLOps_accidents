@@ -61,3 +61,17 @@ curl http://127.0.0.2:8080/ -H 'Content-Type: application/json' -d '{}'
 
 
 
+
+# Data base
+curl http://localhost:9090/create_table
+
+
+
+curl -X POST http://localhost:9090/data -H "Content-Type: application/json" -d '{"query":"SELECT count(*) FROM dataset;"}'
+
+curl -X POST http://localhost:9090/data -H "Content-Type: application/json" -d '{"query":"SELECT * FROM dataset;"}'
+
+curl -X POST http://localhost:9090/insert_csv?file_path=dataset.csv
+
+
+

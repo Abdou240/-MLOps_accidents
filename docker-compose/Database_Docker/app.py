@@ -5,7 +5,14 @@ from psycopg2.extras import RealDictCursor
 import shutil
 import os
 from io import StringIO
-from config import DB_HOST, DB_NAME, DB_USER, DB_PASS, DB_PORT  # Updated import
+import os
+#from config import DB_HOST, DB_NAME, DB_USER, DB_PASS, DB_PORT  # Updated import
+
+DB_HOST = os.environ.get('POSTGRES_HOST') 
+DB_NAME = os.environ.get('POSTGRES_DB') 
+DB_USER = os.environ.get('POSTGRES_USER') 
+DB_PASS = os.environ.get('POSTGRES_PASSWORD') 
+DB_PORT = os.environ.get('POSTGRES_PORT') 
 
 app = Flask(__name__)
 
@@ -38,7 +45,12 @@ def create_database_endpoint():
 @app.route('/create_table', methods=['GET'])
 def create_table_endpoint():
     # Your CREATE TABLE command should be updated accordingly
+    msg = create_table()
+    return jsonify({"message": msg})
 
+
+
+def create_table():    
     create_table_command = (
         """
         CREATE TABLE IF NOT EXISTS dataset (
@@ -81,8 +93,7 @@ def create_table_endpoint():
     conn.commit()
     cursor.close()
     conn.close()
-    
-    return jsonify({"message": "Table created successfully"})
+    return "Table created successfully"
 
 @app.route('/insert_csv', methods=['POST'])
 def insert_csv_endpoint():
@@ -151,4 +162,5 @@ def get_data():
 if __name__ == '__main__':
     if not os.path.exists(DESTINATION_FOLDER):
         os.makedirs(DESTINATION_FOLDER)
+    #create_table()
     app.run(debug=True,host='0.0.0.0', port=5000)

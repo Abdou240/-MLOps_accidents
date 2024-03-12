@@ -46,12 +46,13 @@ services:
     depends_on:
       - api
     privileged: true
+
   flask_app:
-    image: abdou240/flask-app:latest
+    image: flask-app:latest
     container_name: flask_app
     networks:
       - api_net
     ports:
-      - "5000:5000"
+      - "9090:5000"
 networks:
   api_net:

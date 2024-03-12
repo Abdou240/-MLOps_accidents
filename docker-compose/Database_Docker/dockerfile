@@ -1,5 +1,5 @@
 # Use an official Python runtime as a parent image
-FROM python:3.9
+FROM python:3.8.10
 
 # Install PostgreSQL
 RUN apt-get update && apt-get install -y postgresql postgresql-contrib && \
@@ -16,7 +16,7 @@ ENV POSTGRES_HOST=localhost
 ENV POSTGRES_PORT=5432
 
 # Automatically start postgresql service when the container starts
-RUN echo "service postgresql start" >> ~/.bashrc
+#RUN echo "service postgresql start" >> ~/.bashrc
 
 # Create a PostgreSQL role named `yourUsername` with 'yourPassword' as the password and
 # then create a database `yourDatabaseName` owned by the `yourUsername` role.
