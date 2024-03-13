@@ -95,6 +95,9 @@ async def test():
 	res = requests.post('http://model:8080/invocations',  
 						json={'dataframe_records': [features]},
 						 headers={"Content-Type": "application/json"})
+
+	res_db = requests.get('http://database:9090/create_table')
+	#curl http://localhost:9090/create_table
 	#print(res.text)
 	#print(res.json())
 	# res = requests.get('http://model:8080/health')
@@ -106,4 +109,5 @@ async def test():
 	# print(res.status_code)
 	# if res.status_code == 200:
 	# 	return {'Model Status':'Model is running'}
-	return {'predictions':res.json()['predictions']}
+	return {'predictions':res.json()['predictions'], 
+			'db_conection':res_db.json()['message']}

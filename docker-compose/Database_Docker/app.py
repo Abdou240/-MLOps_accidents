@@ -1,4 +1,3 @@
-from flask import Flask, jsonify, request
 import psycopg2
 from psycopg2.extensions import ISOLATION_LEVEL_AUTOCOMMIT
 from psycopg2.extras import RealDictCursor
@@ -6,7 +5,13 @@ import shutil
 import os
 from io import StringIO
 import os
-#from config import DB_HOST, DB_NAME, DB_USER, DB_PASS, DB_PORT  # Updated import
+
+### NEW
+from fastapi import FastAPI, Body, Request
+from fastapi.encoders import jsonable_encoder
+app = FastAPI()
+
+### END NEW
 
 DB_HOST = os.environ.get('POSTGRES_HOST') 
 DB_NAME = os.environ.get('POSTGRES_DB') 
@@ -14,7 +19,6 @@ DB_USER = os.environ.get('POSTGRES_USER')
 DB_PASS = os.environ.get('POSTGRES_PASSWORD') 
 DB_PORT = os.environ.get('POSTGRES_PORT') 
 
-app = Flask(__name__)
 
 CSV_FILE_PATH = "dataset.csv"  # Ensure this path points to your CSV file
 DESTINATION_FOLDER = "./Transferred/"
@@ -22,7 +26,8 @@ DESTINATION_FOLDER = "./Transferred/"
 def get_db_connection():
     return psycopg2.connect(dbname=DB_NAME, user=DB_USER, password=DB_PASS, host=DB_HOST, port=DB_PORT)
 
-@app.route('/create_database', methods=['GET'])
+
+@app.get("/create_database")
 def create_database_endpoint():
     conn = psycopg2.connect(dbname="postgres", user=DB_USER, password=DB_PASS, host=DB_HOST, port=DB_PORT)
     conn.set_isolation_level(ISOLATION_LEVEL_AUTOCOMMIT)
@@ -40,13 +45,13 @@ def create_database_endpoint():
 
     cursor.close()
     conn.close()
-    return jsonify({"message": message})
+    return {"message": message}
 
-@app.route('/create_table', methods=['GET'])
+@app.get('/create_table')
 def create_table_endpoint():
     # Your CREATE TABLE command should be updated accordingly
     msg = create_table()
-    return jsonify({"message": msg})
+    return {"message": msg}
 
 
 
@@ -95,7 +100,7 @@ def create_table():
     conn.close()
     return "Table created successfully"
 
-@app.route('/insert_csv', methods=['POST'])
+@app.post('/insert_csv')
 def insert_csv_endpoint():
     file_path = request.args.get('file_path', CSV_FILE_PATH)
     
@@ -115,9 +120,9 @@ def insert_csv_endpoint():
             cursor.close()
     conn.close()
     
-    return jsonify({"message": message})
+    return {"message": message}
 
-@app.route('/move_csv', methods=['POST'])
+@app.post('/move_csv')
 def move_csv_endpoint():
     file_path = request.args.get('file_path', CSV_FILE_PATH)
     try:
@@ -126,9 +131,9 @@ def move_csv_endpoint():
     except Exception as e:
         message = "Error moving file: " + str(e)
     
-    return jsonify({"message": message})
+    return {"message": message}
 
-@app.route('/data_test', methods=['GET'])
+@app.get('/data_test')
 def get_data_():
     conn = get_db_connection()
     cursor = conn.cursor(cursor_factory=RealDictCursor)
@@ -136,16 +141,16 @@ def get_data_():
     data = cursor.fetchall()
     cursor.close()
     conn.close()
-    return jsonify(data)
+    return jsonable_encoder(data)
 
-@app.route('/data', methods=['POST'])
+@app.post('/data')
 def get_data():
     data = request.get_json()  # Get data from POST request
     query = data.get('query')  # Extract query from the data
 
     # Basic validation for the query input
     if not query:
-        return jsonify({'error': 'No query provided'}), 400
+        return jsonable_encoder({'error': 'No query provided'}), 400
 
     try:
         conn = get_db_connection()
@@ -154,13 +159,13 @@ def get_data():
         data = cursor.fetchall()
         cursor.close()
         conn.close()
-        return jsonify(data)
+        return jsonable_encoder(data)
     except Exception as e:
-        return jsonify({'error': 'Failed to execute query', 'details': str(e)}), 500
+        return jsonable_encoder({'error': 'Failed to execute query', 'details': str(e)}), 500
 
 
-if __name__ == '__main__':
-    if not os.path.exists(DESTINATION_FOLDER):
-        os.makedirs(DESTINATION_FOLDER)
-    #create_table()
-    app.run(debug=True,host='0.0.0.0', port=5000)
+# if __name__ == '__main__':
+#     if not os.path.exists(DESTINATION_FOLDER):
+#         os.makedirs(DESTINATION_FOLDER)
+#     #create_table()
+#     app.run(debug=True,host='0.0.0.0', port=5000)
