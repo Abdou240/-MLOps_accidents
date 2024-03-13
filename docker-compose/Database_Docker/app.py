@@ -179,9 +179,8 @@ async def manage_users(request_data: ManageUsersRequest):
 
 
 @app.post('/insert_csv')
-def insert_csv_endpoint(file_path: str = None):
-    if not file_path:
-        file_path = CSV_FILE_PATH
+def insert_csv_endpoint(request: Request):
+    file_path = request.args.get('file_path', CSV_FILE_PATH)
     
     conn = get_db_connection()
     cursor = conn.cursor()
@@ -202,7 +201,8 @@ def insert_csv_endpoint(file_path: str = None):
     return {"message": message}
 
 @app.post('/move_csv')
-def move_csv_endpoint(file_path: str = CSV_FILE_PATH):  # Default value assigned here
+def move_csv_endpoint(request: Request):
+    file_path = request.args.get('file_path', CSV_FILE_PATH)
     try:
         destination_path = os.path.join(DESTINATION_FOLDER, os.path.basename(file_path))
         shutil.move(file_path, destination_path)
@@ -222,23 +222,39 @@ def get_data_():
     conn.close()
     return jsonable_encoder(data)
 
-# Define a Pydantic model for the expected request body
-class QueryData(BaseModel):
-    query: str
-
 @app.post('/data')
-def execute_query(data: QueryData):
+async def get_data(request: Request):
+    data = await request.json()  # Get data from POST request
+    query = data['query']  # Extract query from the data
+
     # Basic validation for the query input
-    if not data.query:
-        return JSONResponse(status_code=status.HTTP_400_BAD_REQUEST, content=jsonable_encoder({'error': 'No query provided'}))
+    if not query:
+        return jsonable_encoder({'error': 'No query provided'}), 400
 
     try:
         conn = get_db_connection()
         cursor = conn.cursor(cursor_factory=RealDictCursor)
-        cursor.execute(data.query)  # Execute the query provided by the user
-        fetched_data = cursor.fetchall()
+        cursor.execute(query)  # Execute the query provided by the user
+        data = cursor.fetchall()
         cursor.close()
         conn.close()
-        return fetched_data
+        return jsonable_encoder(data)
     except Exception as e:
-        return JSONResponse(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, content=jsonable_encoder({'error': 'Failed to execute query', 'details': str(e)}))
+        return jsonable_encoder({'error': 'Failed to execute query', 'details': str(e)}), 500
+
+#@app.post('/data')
+#def execute_query(data: QueryData):
+#    # Basic validation for the query input
+#    if not data.query:
+#        return JSONResponse(status_code=status.HTTP_400_BAD_REQUEST, content=jsonable_encoder({'error': 'No query provided'}))#
+#
+#   try:
+#        conn = get_db_connection()
+#        cursor = conn.cursor(cursor_factory=RealDictCursor)
+#       cursor.execute(data.query)  # Execute the query provided by the user
+#        fetched_data = cursor.fetchall()
+#        cursor.close()
+#        conn.close()
+#        return fetched_data
+#    except Exception as e:
+#        return JSONResponse(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, content=jsonable_encoder({'error': 'Failed to execute query', 'details': str(e)}))
