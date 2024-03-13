@@ -6,10 +6,14 @@ import requests
 from fastapi import FastAPI, Body, Request
 
 app = FastAPI()
-file = open("./unique_loc.csv", "r")
-locations = [x[1] for x in list(csv.reader(file, delimiter=","))]
-del locations[0]
+file = open("./com.csv", "r")
+s = file.read()
+c = s.split('\n')
+r = [row.split(',') for row in c]
+r.remove([''])
+locations = [x[1] for x in r[1:] if x[1].isdigit()]
 file.close()
+
 # loaded_model = joblib.load("../src/models/trained_model.joblib")
 
 # Admin endpoints
@@ -54,9 +58,16 @@ file.close()
 # def gen_stats():
 	# TODO query DB to get general stats on dataset
 
-# @app.get("/superusers/stats_query")
-# def stats_query():
-	# TODO query DB for spefic stats using SQL query
+@app.get("/superusers/stats_query")
+async def stats_query(request: Request):
+	query = await request.json()
+	try:
+		res = requests.post('http://database:9090/data', json={'query': query})
+		res = res.json()
+	except:
+		raise ConnectionError('Database not responding')
+	else:	
+		return res
 
 
 # General users endpoints
@@ -64,50 +75,52 @@ file.close()
 @app.get("/gen_user/risky_locations")
 async def risky_locations(request: Request):
 	features = await request.json()
-	feature_list = [dict({'com': mun}, **features) for mun in locations]
-	res = requests.post('http://model:8080/invocations', 
-						json={'dataframe_records': feature_list},
-						headers={"Content-Type": "application/json"})						
-	pred = res.json()['predictions']
-	idx = sorted(range(len(pred)), key=lambda i: pred[i])[-10:]
-	return {'locations': [locations[i] for i in idx], 'predictions': [pred[i] for i in idx]}
-	# TODO return top 10 risky locations after querying the model with loads of predictions
+	feature_list = [dict({'com': mun}, **features['features']) for mun in locations]
+	try:
+		res = requests.post('http://model:8080/invocations', json={'dataframe_records': feature_list})
+		res = res.json()
+	except:
+		raise ConnectionError('Model not responding')
+	else:					
+		pred = res['predictions']
+		idx = sorted(range(len(pred)), key=lambda i: pred[i])[-(features['top_loc']):]
+		return {'locations': [locations[i] for i in idx], 'predictions': [pred[i] for i in idx]}
 
 @app.get("/gen_user/query_location")
 async def query_location(request: Request):
 	features = await request.json()
-	res = requests.post('http://model:8080/invocations', 
-						json={'dataframe_records': [features]},
-						headers={"Content-Type": "application/json"})
-	pred = res.json()['predictions'][0]
-	return pred
+	try:
+		res = requests.post('http://model:8080/invocations', json={'dataframe_records': [features]})
+		res = res.json()
+	except:
+		raise ConnectionError('Model not responding')
+	else:
+		pred = res['predictions'][0]
+		return pred
 	# TODO return info on riskyness of this location by querying model container with loads of predictions about this location
 
-@app.get("/status")
+@app.get("/status/api")
 def test():
-	print('here')
-	return {'test':'Active'}
+	return True
 
-@app.get("/model_status")
-async def test():
+@app.get("/status/model")
+def test():
 	features = {'catu': 0, 'victim_age': 10, 'lum': 0, 'com': 77317, 'atm': 0}
+	try:
+		res = requests.post('http://model:8080/invocations', json={'dataframe_records': [features]})
+		res = res.json()
+	except:
+		raise ConnectionError('Model not responding')
+	else:
+		return True
 	
-	res = requests.post('http://model:8080/invocations',  
-						json={'dataframe_records': [features]},
-						 headers={"Content-Type": "application/json"})
-
-	res_db = requests.get('http://database:9090/create_table')
-	#curl http://localhost:9090/create_table
-	#print(res.text)
-	#print(res.json())
-	# res = requests.get('http://model:8080/health')
-	# # f'http://api:8090{endpoint}'
-	# print(res, dir(res))
-	# print(res.ok)
-	# print(res.json())
-	# print(res.text)
-	# print(res.status_code)
-	# if res.status_code == 200:
-	# 	return {'Model Status':'Model is running'}
-	return {'predictions':res.json()['predictions'], 
-			'db_conection':res_db.json()['message']}
+@app.get("/status/database")
+def test():
+	try:
+		res = requests.get('http://database:9090/data_test')
+		if res.status_code != 200:
+			raise ConnectionError('Database not responding')
+	except:
+		raise ConnectionError('Database not responding')
+	else:
+		return True

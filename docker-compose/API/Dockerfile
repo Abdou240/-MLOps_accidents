@@ -8,7 +8,7 @@ RUN curl -s https://bootstrap.pypa.io/get-pip.py -o get-pip.py && \
     rm get-pip.py
 RUN pip3 install joblib requests==2.21.0 fastapi uvicorn==0.17.0
 ADD main.py /my_api/api.py
-ADD unique_loc.csv /my_api/unique_loc.csv
+ADD v_commune_2023.csv /my_api/com.csv
 WORKDIR /my_api/
 ENV LC_CTYPE=UTF-8 LC_ALL=C.UTF-8 LANG=C.UTF-8
 EXPOSE 8090
