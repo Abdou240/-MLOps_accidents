@@ -1,4 +1,3 @@
-Flask==1.1.2
 psycopg2-binary==2.8.6
 Pandas
 numpy
@@ -6,3 +5,5 @@ scikit-learn
 seaborn
 imbalanced-learn
 joblib
+fastapi
+uvicorn==0.17.0

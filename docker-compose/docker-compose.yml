@@ -47,12 +47,20 @@ services:
       - api
     privileged: true
 
-  flask_app:
-    image: flask-app:latest
-    container_name: flask_app
+  # flask_app:
+  #   image: flask-app:latest
+  #   container_name: flask_app
+  #   networks:
+  #     - api_net
+  #   ports:
+  #     - "9090:5000"
+
+  database:
+    image: database_api:latest
+    container_name: database
     networks:
       - api_net
     ports:
-      - "9090:5000"
+      - "9090:9090"
 networks:
   api_net:
