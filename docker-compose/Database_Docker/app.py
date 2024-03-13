@@ -101,7 +101,7 @@ def create_table():
     return "Table created successfully"
 
 @app.post('/insert_csv')
-def insert_csv_endpoint():
+def insert_csv_endpoint(request: Request):
     file_path = request.args.get('file_path', CSV_FILE_PATH)
     
     conn = get_db_connection()
@@ -123,7 +123,7 @@ def insert_csv_endpoint():
     return {"message": message}
 
 @app.post('/move_csv')
-def move_csv_endpoint():
+def move_csv_endpoint(request: Request):
     file_path = request.args.get('file_path', CSV_FILE_PATH)
     try:
         shutil.move(file_path, os.path.join(DESTINATION_FOLDER, os.path.basename(file_path)))
@@ -144,9 +144,9 @@ def get_data_():
     return jsonable_encoder(data)
 
 @app.post('/data')
-def get_data():
-    data = request.get_json()  # Get data from POST request
-    query = data.get('query')  # Extract query from the data
+async def get_data(request: Request):
+    data = await request.json()  # Get data from POST request
+    query = data['query']  # Extract query from the data
 
     # Basic validation for the query input
     if not query:
