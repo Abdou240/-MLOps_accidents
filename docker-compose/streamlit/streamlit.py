@@ -11,6 +11,10 @@ if nav == 'API Endpoints':
 	users = ['/admin', '/superusers', '/gen_user', '/status']
 	endpoints = {'/status': ['/api', '/model', '/database'], '/admin': {'/model': ['/retrain', '/stats', '/predict'], '/users': ['/list', '/add', '/remove', '/update']}, '/gen_user': ['/query_location', '/risky_locations'], '/superusers': ['/gen_stats', '/stats_query']}
 	user = col2.radio('users', users, label_visibility='collapsed')
+	if st.button('Create table'):
+		res = requests.get('http://database:9090/create_table')
+	if st.button('Add Users'):
+		res = requests.get('http://database:9090/init_users')
 
 	feats = {
 		'catu': {
@@ -133,21 +137,38 @@ if nav == 'API Endpoints':
 			else:
 				res_com = res['locations']
 				res_com = [coms_label[coms_code.index('0'*(5 - len(com)) + str(com))] for com in res_com]
-				for com, risk in zip(res_com, res['predictions']):
-					c = st.container()
-					col1, col2 = c.columns([2, 8])
-					col1.write(com)
-					progress = PredProgress(risk, col2)
+				with st.container(height=300):
+					for com, risk in zip(res_com, res['predictions']):
+						c = st.container()
+						col1, col2 = c.columns([2, 8])
+						col1.write(com)
+						progress = PredProgress(risk, col2)
 
 	if endpoint == '/stats_query':
 		query = st.text_input('SQL Query', value='')
 		search = st.button('Search')
 		if search:
 			try:
-				res = requests.get(f'http://api:8090{user}{endpoint}', json=query)
+				res = requests.get(f'http://api:8090{user}{endpoint}', json={'query': query, 'username': username, 'password': password})
 				res = res.json()
-			except:
+			except ConnectionError:
 				st.warning('DB not connected yet...', icon="⚠️")
+			except ValueError as err:
+				st.warning(err, icon="⚠️")
 			else:
 				st.subheader('Query Response')
+				st.write(res)
+	
+	if endpoint == '/gen_stats':
+		search = st.button('get')
+		if search:
+			try:
+				res = requests.get(f'http://api:8090{user}{endpoint}', json={'username': username, 'password': password})
+				res = res.json()
+			except ConnectionError:
+				st.warning('DB not connected yet...', icon="⚠️")
+			except ValueError as err:
+				st.warning(err, icon="⚠️")
+			else:
+				st.subheader('General Stats')
 				st.write(res)

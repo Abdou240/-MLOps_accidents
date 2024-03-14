@@ -18,6 +18,15 @@ file.close()
 
 # Admin endpoints
 
+def auth(user, username, password):
+	query = f'SELECT * FROM user_tab WHERE username=\'{username}\' AND password=\'{password}\''
+	res = requests.post('http://database:9090/data', json={'query': query})
+	res = res.json()
+	if len(res) == 0:
+		raise ValueError('User does not exist')
+	elif res[0]['permission'].lower() != user:
+		raise ValueError('Incorrect Permissions')
+
 # @app.post("/admin/model/retrain")
 # def retrain_model(years=5):
 	# TODO Send request to the model container to trigger retraining no n years of recent data
@@ -54,20 +63,39 @@ file.close()
 
 # Superuser endpoints
 
-# @app.get("/superusers/gen_stats")
-# def gen_stats():
+@app.get("/superusers/gen_stats")
+async def gen_stats(request: Request):
+	query = await request.json()
+	try:
+		auth('superuser', query['username'], query['password'])
+	except ValueError as err:
+		raise err
+	else:
+		try:
+			gen_query = 'SELECT COUNT(catu) FROM dataset'
+			res = requests.post('http://database:9090/data', json={'query': gen_query})
+			res = res.json()
+		except:
+			raise ConnectionError('Database not responding')
+		else:	
+			return res
 	# TODO query DB to get general stats on dataset
 
 @app.get("/superusers/stats_query")
 async def stats_query(request: Request):
 	query = await request.json()
 	try:
-		res = requests.post('http://database:9090/data', json={'query': query})
-		res = res.json()
-	except:
-		raise ConnectionError('Database not responding')
-	else:	
-		return res
+		auth('superuser', query['username'], query['password'])
+	except ValueError as err:
+		raise err
+	else:
+		try:
+			res = requests.post('http://database:9090/data', json={'query': query['query']})
+			res = res.json()
+		except:
+			raise ConnectionError('Database not responding')
+		else:	
+			return res
 
 
 # General users endpoints
