@@ -14,7 +14,6 @@ r.remove([''])
 locations = [x[1] for x in r[1:] if x[1].isdigit()]
 file.close()
 
-# loaded_model = joblib.load("../src/models/trained_model.joblib")
 
 # Admin endpoints
 
@@ -62,7 +61,7 @@ async def users_list(request: Request):
 			raise HTTPException(status_code=404, detail='Database not responding')
 		else:	
 			return res
-	# TODO query database container to get list of superusers
+	
 
 # Query structure for user modification:
 # {
@@ -95,7 +94,7 @@ async def users_add(request: Request):
 			raise HTTPException(status_code=404, detail='Database not responding')
 		else:	
 			return res
-	# TODO send update request to DB container
+	
 
 @app.post("/admin/users/remove")
 async def users_remove(request: Request):
@@ -116,7 +115,7 @@ async def users_remove(request: Request):
 			except:
 				raise HTTPException(status_code=404, detail='Database not responding')
 		return True	
-	# TODO send remove request to DB container
+	
 
 @app.post("/admin/users/update")
 async def users_update(request: Request):
@@ -134,7 +133,7 @@ async def users_update(request: Request):
 			raise HTTPException(status_code=404, detail='Database not responding')
 		else:
 			return res
-	# TODO send update request to update a specific user
+	
 
 
 # Superuser endpoints
@@ -201,7 +200,7 @@ async def query_location(request: Request):
 	else:
 		pred = res['predictions'][0]
 		return pred
-	# TODO return info on riskyness of this location by querying model container with loads of predictions about this location
+	
 
 @app.get("/status/api")
 def test():
