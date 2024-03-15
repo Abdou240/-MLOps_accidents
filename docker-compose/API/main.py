@@ -3,7 +3,7 @@ import joblib
 import csv
 import requests
 
-from fastapi import FastAPI, Body, Request
+from fastapi import FastAPI, Body, Request, HTTPException
 
 app = FastAPI()
 file = open("./com.csv", "r")
@@ -19,11 +19,13 @@ file.close()
 # Admin endpoints
 
 def auth(user, username, password):
-	query = f'SELECT * FROM user_tab WHERE username=\'{username}\' AND password=\'{password}\''
+	query = f'SELECT * FROM user_tab WHERE username=\'{username}\''
 	res = requests.post('http://database:9090/data', json={'query': query})
 	res = res.json()
 	if len(res) == 0:
 		raise ValueError('User does not exist')
+	elif res[0]['password'] != password:
+		raise ValueError('Incorrect password')
 	elif res[0]['permission'].lower() != user:
 		raise ValueError('Incorrect Permissions')
 
@@ -44,56 +46,109 @@ def auth(user, username, password):
 # 	prediction = loaded_model.predict(input_df)
 # 	return {'predictions': [x.item() for x in list(prediction)]}
 
-# @app.get("/admin/users/list")
-# def users_list():
+@app.get("/admin/users/list")
+async def users_list(request: Request):
+	query = await request.json()
+	try:
+		auth('admin', query['username'], query['password'])
+	except ValueError as err:
+		raise HTTPException(status_code=404, detail=f'{err}')
+	else:
+		try:
+			gen_query = 'SELECT * FROM user_tab'
+			res = requests.post('http://database:9090/data', json={'query': gen_query})
+			res = res.json()
+		except:
+			return HTTPException(status_code=404, detail='Database not responding')
+		else:	
+			return res
 	# TODO query database container to get list of superusers
 
-# @app.post("/admin/users/add")
-# def users_add(user):
+@app.post("/admin/users/add")
+async def users_add(request: Request):
+	query = await request.json()
+	try:
+		auth('admin', query['username'], query['password'])
+	except ValueError as err:
+		raise HTTPException(status_code=404, detail=f'{err}')
+	else:
+		try:
+			res = requests.post('http://database:9090/admin/manage_users', json=query['user'])
+			res = res.json()
+		except:
+			return HTTPException(status_code=404, detail='Database not responding')
+		else:	
+			return res
 	# TODO send update request to DB container
 
-# @app.post("/admin/users/remove")
-# def users_remove(user):
+@app.post("/admin/users/remove")
+async def users_remove(request: Request):
+	query = await request.json()
+	try:
+		auth('admin', query['username'], query['password'])
+	except ValueError as err:
+		raise HTTPException(status_code=404, detail=f'{err}')
+	else:
+		try:
+			res = requests.post('http://database:9090/admin/manage_users', json=query['user'])
+			res = res.json()
+		except:
+			return HTTPException(status_code=404, detail='Database not responding')
+		else:	
+			return res
 	# TODO send remove request to DB container
 
-# @app.post("/admin/users/update")
-# def users_update(user):
+@app.post("/admin/users/update")
+async def users_update(request: Request):
+	query = await request.json()
+	try:
+		auth('admin', query['username'], query['password'])
+	except ValueError as err:
+		raise HTTPException(status_code=404, detail=f'{err}')
+	else:
+		try:
+			res = requests.post('http://database:9090/admin/manage_users', json=query['user'])
+			res = res.json()
+		except:
+			return HTTPException(status_code=404, detail='Database not responding')
+		else:	
+			return res
 	# TODO send update request to update a specific user
 
 
 # Superuser endpoints
 
-@app.get("/superusers/gen_stats")
+@app.get("/superuser/gen_stats")
 async def gen_stats(request: Request):
 	query = await request.json()
 	try:
 		auth('superuser', query['username'], query['password'])
 	except ValueError as err:
-		raise err
+		raise HTTPException(status_code=404, detail=f'{err}')
 	else:
 		try:
 			gen_query = 'SELECT COUNT(catu) FROM dataset'
 			res = requests.post('http://database:9090/data', json={'query': gen_query})
 			res = res.json()
 		except:
-			raise ConnectionError('Database not responding')
+			return HTTPException(status_code=404, detail='Database not responding')
 		else:	
 			return res
 	# TODO query DB to get general stats on dataset
 
-@app.get("/superusers/stats_query")
+@app.get("/superuser/stats_query")
 async def stats_query(request: Request):
 	query = await request.json()
 	try:
 		auth('superuser', query['username'], query['password'])
 	except ValueError as err:
-		raise err
+		raise HTTPException(status_code=404, detail=f'{err}')
 	else:
 		try:
 			res = requests.post('http://database:9090/data', json={'query': query['query']})
 			res = res.json()
 		except:
-			raise ConnectionError('Database not responding')
+			return HTTPException(status_code=404, detail='Database not responding')
 		else:	
 			return res
 
