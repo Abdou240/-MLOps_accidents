@@ -18,13 +18,13 @@ file.close()
 
 # Admin endpoints
 
-def auth(user, username, password):
-	query = f'SELECT * FROM user_tab WHERE username=\'{username}\''
+def auth(user, auth):
+	query = f"SELECT * FROM user_tab WHERE username='{auth['username']}'"
 	res = requests.post('http://database:9090/data', json={'query': query})
 	res = res.json()
 	if len(res) == 0:
 		raise ValueError('User does not exist')
-	elif res[0]['password'] != password:
+	elif res[0]['password'] != auth['password']:
 		raise ValueError('Incorrect password')
 	elif res[0]['permission'].lower() != user:
 		raise ValueError('Incorrect Permissions')
@@ -50,7 +50,7 @@ def auth(user, username, password):
 async def users_list(request: Request):
 	query = await request.json()
 	try:
-		auth('admin', query['username'], query['password'])
+		auth('admin', query['auth'])
 	except ValueError as err:
 		raise HTTPException(status_code=404, detail=f'{err}')
 	else:
@@ -59,24 +59,40 @@ async def users_list(request: Request):
 			res = requests.post('http://database:9090/data', json={'query': gen_query})
 			res = res.json()
 		except:
-			return HTTPException(status_code=404, detail='Database not responding')
+			raise HTTPException(status_code=404, detail='Database not responding')
 		else:	
 			return res
 	# TODO query database container to get list of superusers
+
+# Query structure for user modification:
+# {
+# 	'auth': {
+# 		'username': 'test',
+# 		'password': 'test',
+# 	},
+# 	'query': {
+# 		'action': ['add', 'modify', 'delete'],
+# 		'target_username': 'test' or ['test1', 'test2'],
+# 		'new_username': 'test',
+# 		'new_password': 'test',
+# 		'new_permission': 'test'
+# 	}
+# }
 
 @app.post("/admin/users/add")
 async def users_add(request: Request):
 	query = await request.json()
 	try:
-		auth('admin', query['username'], query['password'])
+		auth('admin', query['auth'])
 	except ValueError as err:
 		raise HTTPException(status_code=404, detail=f'{err}')
 	else:
 		try:
-			res = requests.post('http://database:9090/admin/manage_users', json=query['user'])
+			query['query']['action'] = 'add'
+			res = requests.post('http://database:9090/admin/manage_users', json=query['query'])
 			res = res.json()
 		except:
-			return HTTPException(status_code=404, detail='Database not responding')
+			raise HTTPException(status_code=404, detail='Database not responding')
 		else:	
 			return res
 	# TODO send update request to DB container
@@ -85,33 +101,38 @@ async def users_add(request: Request):
 async def users_remove(request: Request):
 	query = await request.json()
 	try:
-		auth('admin', query['username'], query['password'])
+		auth('admin', query['auth'])
 	except ValueError as err:
 		raise HTTPException(status_code=404, detail=f'{err}')
 	else:
-		try:
-			res = requests.post('http://database:9090/admin/manage_users', json=query['user'])
-			res = res.json()
-		except:
-			return HTTPException(status_code=404, detail='Database not responding')
-		else:	
-			return res
+		query['query']['action'] = 'delete'
+		users = query['query']['target_username']
+		for user in users:
+			try:
+				query['query']['target_username'] = user
+				res = requests.post('http://database:9090/admin/manage_users', json=query['query'])
+				res = res.json()
+				
+			except:
+				raise HTTPException(status_code=404, detail='Database not responding')
+		return True	
 	# TODO send remove request to DB container
 
 @app.post("/admin/users/update")
 async def users_update(request: Request):
 	query = await request.json()
 	try:
-		auth('admin', query['username'], query['password'])
+		auth('admin', query['auth'])
 	except ValueError as err:
 		raise HTTPException(status_code=404, detail=f'{err}')
 	else:
 		try:
-			res = requests.post('http://database:9090/admin/manage_users', json=query['user'])
+			query['query']['action'] = 'modify'
+			res = requests.post('http://database:9090/admin/manage_users', json=query['query'])
 			res = res.json()
 		except:
-			return HTTPException(status_code=404, detail='Database not responding')
-		else:	
+			raise HTTPException(status_code=404, detail='Database not responding')
+		else:
 			return res
 	# TODO send update request to update a specific user
 
@@ -122,7 +143,7 @@ async def users_update(request: Request):
 async def gen_stats(request: Request):
 	query = await request.json()
 	try:
-		auth('superuser', query['username'], query['password'])
+		auth('superuser', query['auth'])
 	except ValueError as err:
 		raise HTTPException(status_code=404, detail=f'{err}')
 	else:
@@ -131,7 +152,7 @@ async def gen_stats(request: Request):
 			res = requests.post('http://database:9090/data', json={'query': gen_query})
 			res = res.json()
 		except:
-			return HTTPException(status_code=404, detail='Database not responding')
+			raise HTTPException(status_code=404, detail='Database not responding')
 		else:	
 			return res
 	# TODO query DB to get general stats on dataset
@@ -140,7 +161,7 @@ async def gen_stats(request: Request):
 async def stats_query(request: Request):
 	query = await request.json()
 	try:
-		auth('superuser', query['username'], query['password'])
+		auth('superuser', query['auth'])
 	except ValueError as err:
 		raise HTTPException(status_code=404, detail=f'{err}')
 	else:
@@ -148,7 +169,7 @@ async def stats_query(request: Request):
 			res = requests.post('http://database:9090/data', json={'query': query['query']})
 			res = res.json()
 		except:
-			return HTTPException(status_code=404, detail='Database not responding')
+			raise HTTPException(status_code=404, detail='Database not responding')
 		else:	
 			return res
 
