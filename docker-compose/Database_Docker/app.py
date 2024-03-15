@@ -133,43 +133,42 @@ class ManageUsersRequest(BaseModel):
 
 
 @app.post("/admin/manage_users")
-async def manage_users(request_data: ManageUsersRequest):
-    data = request_data.dict()
-    username = data['username']
-    password = data['password']
+async def manage_users(request: Request):
+    data = await request.json()
+    # username = data['username']
+    # password = data['password']
     action = data['action']
 
-    if not username or not password:
-        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Missing credentials")
-
+    # if not username or not password:
+    #     raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Missing credentials")
     try:
         conn = get_db_connection()
         cursor = conn.cursor()
-        cursor.execute("SELECT Permission FROM user_tab WHERE Username = %s AND Password = %s", (username, password))
-        permission_record = cursor.fetchone()
+        # cursor.execute("SELECT Permission FROM user_tab WHERE Username = %s AND Password = %s", (username, password))
+        # permission_record = cursor.fetchone()
 
-        if not permission_record or permission_record[0].lower() != 'admin':
-            raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Unauthorized")
+        # if not permission_record or permission_record[0].lower() != 'admin':
+        #     raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Unauthorized")
 
         if action == 'add':
             new_username = data['new_username']
             new_password = data['new_password']
             new_permission = data['new_permission']
-            cursor.execute("INSERT INTO user_tab (Username, Password, Permission) VALUES (%s, %s, %s)", (new_username, new_password, new_permission))
+            cursor.execute(f"INSERT INTO user_tab (Username, Password, Permission) VALUES ('{new_username}', '{new_password}', '{new_permission}')")
         elif action == 'delete':
             target_username = data['target_username']
-            cursor.execute("DELETE FROM user_tab WHERE Username = %s", (target_username))
+            cursor.execute(f"DELETE FROM user_tab WHERE Username = '{target_username}'")
         elif action == 'modify':
             target_username = data['target_username']
             new_username = data['new_username']
             new_password = data['new_password']
             new_permission = data['new_permission']
-            cursor.execute("UPDATE user_tab SET Password = %s, Permission = %s, Username = %s WHERE Username = %s", (new_password, new_permission, new_username, target_username))
+            cursor.execute(f"UPDATE user_tab SET Password = '{new_password}', Permission = '{new_permission}', Username = '{new_username}' WHERE Username = '{target_username}'")
         else:
             raise ValueError("Invalid action specified")
 
         conn.commit()
-        message = f"Action '{action}' completed successfully for user: {new_username}"
+        message = f"Action '{action}' completed successfully for user: {data['target_username'] if 'target_username' in data.keys() else data['new_username']}"
     except Exception as e:
         conn.rollback()
         raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail=f"Error executing '{action}': {str(e)}")
