@@ -18,8 +18,9 @@ DESTINATION_FOLDER = "./Transferred/"
 def get_db_connection():
     return psycopg2.connect(dbname=DB_NAME, user=DB_USER, password=DB_PASS, host=DB_HOST, port=DB_PORT)
 
-@app.get("/create_database")
-def create_database_endpoint():
+#@app.get("/create_database")
+#def create_database_endpoint():
+def create_database():
     conn = psycopg2.connect(dbname="postgres", user=DB_USER, password=DB_PASS, host=DB_HOST, port=DB_PORT)
     conn.set_isolation_level(ISOLATION_LEVEL_AUTOCOMMIT)
     cursor = conn.cursor()
@@ -39,8 +40,9 @@ def create_database_endpoint():
     return {"message": message}
 
 
-@app.get('/create_table')
-async def create_table_endpoint():
+#@app.get('/create_table')
+#async def create_table_endpoint():
+def create_table():
     # Your CREATE TABLE command should be updated accordingly
     create_table_command = """
         CREATE TABLE IF NOT EXISTS dataset (
@@ -88,16 +90,18 @@ async def create_table_endpoint():
         cursor.execute(create_table_command)
         cursor.execute(user_create_command)
         conn.commit()
+        message = "Tables created successfully"
     except Exception as e:
         conn.rollback()
-        raise HTTPException(status_code=500, detail=str(e))
+        #raise HTTPException(status_code=500, detail=str(e))
+        message = f"Failed to create tables: {str(e)}"
     finally:
         cursor.close()
         conn.close()
+    return {"message": message}
+    #return {"message": "Table created successfully"}
 
-    return {"message": "Table created successfully"}
-
-@app.get("/init_users")
+#@app.get("/init_users")
 def init_users():
     users = [
         ("Test_admin", "Test_admin_password", "Admin"),
@@ -113,14 +117,62 @@ def init_users():
         for user in users:
             cursor.execute(insert_command, user)
         conn.commit()
+        message = "User table initialized successfully"
     except Exception as e:
         conn.rollback()
-        return JSONResponse(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, content={"message": "Failed to initialize user table"})
+        message = f"Failed to initialize user table: {str(e)}"
+        #return JSONResponse(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, content={"message": "Failed to initialize user table"})
     finally:
         cursor.close()
         conn.close()
     
-    return {"message": "User table initialized successfully"}
+    return {"message": message} #{"message": "User table initialized successfully"}
+
+#@app.post('/insert_csv')
+#def insert_csv_endpoint(request: Request):
+def insert_csv(file_path=CSV_FILE_PATH):
+    file_path = request.args.get('file_path', CSV_FILE_PATH)
+    
+    conn = get_db_connection()
+    cursor = conn.cursor()
+    try:
+        with open(file_path, 'r', encoding='utf-8') as f:
+            buffer = StringIO(f.read())
+            buffer.seek(0)
+            cursor.copy_expert(f"COPY dataset FROM STDIN WITH CSV HEADER DELIMITER ',' NULL ''", buffer)
+            conn.commit()
+            message = "Data inserted successfully from CSV."
+    except Exception as e:
+        conn.rollback()
+        message = "Error inserting data from CSV: " + str(e)
+    finally:
+        cursor.close()
+        conn.close()
+    
+    return {"message": message}
+
+#@app.post('/move_csv')
+#def move_csv_endpoint(request: Request):
+def move_csv(file_path=CSV_FILE_PATH):
+    file_path = request.args.get('file_path', CSV_FILE_PATH)
+    try:
+        destination_path = os.path.join(DESTINATION_FOLDER, os.path.basename(file_path))
+        shutil.move(file_path, destination_path)
+        message = f"File moved to {destination_path} successfully."
+    except Exception as e:
+        message = f"Error moving file: {str(e)}"
+    
+    return {"message": message}
+
+def initialize_application():
+    print(create_database())
+    print(create_table())
+    print(init_users())
+    print(insert_csv())
+    print(move_csv())
+
+
+initialize_application()
 
 
 class ManageUsersRequest(BaseModel):
@@ -178,43 +230,6 @@ async def manage_users(request: Request):
 
     return {"message": message}
 
-
-
-
-
-@app.post('/insert_csv')
-def insert_csv_endpoint(request: Request):
-    file_path = request.args.get('file_path', CSV_FILE_PATH)
-    
-    conn = get_db_connection()
-    cursor = conn.cursor()
-    try:
-        with open(file_path, 'r', encoding='utf-8') as f:
-            buffer = StringIO(f.read())
-            buffer.seek(0)
-            cursor.copy_expert(f"COPY dataset FROM STDIN WITH CSV HEADER DELIMITER ',' NULL ''", buffer)
-            conn.commit()
-            message = "Data inserted successfully from CSV."
-    except Exception as e:
-        conn.rollback()
-        message = "Error inserting data from CSV: " + str(e)
-    finally:
-        cursor.close()
-        conn.close()
-    
-    return {"message": message}
-
-@app.post('/move_csv')
-def move_csv_endpoint(request: Request):
-    file_path = request.args.get('file_path', CSV_FILE_PATH)
-    try:
-        destination_path = os.path.join(DESTINATION_FOLDER, os.path.basename(file_path))
-        shutil.move(file_path, destination_path)
-        message = f"File moved to {destination_path} successfully."
-    except Exception as e:
-        message = f"Error moving file: {str(e)}"
-    
-    return {"message": message}
 
 @app.get('/data_test')
 def get_data_():
