@@ -11,7 +11,7 @@ from fastapi.encoders import jsonable_encoder
 from pydantic import BaseModel
 
 app = FastAPI()
-
+#abs_path = str(Path().absolute())
 CSV_FILE_PATH = "dataset.csv"  # Ensure this path points to your CSV file
 DESTINATION_FOLDER = "./Transferred/"
 
@@ -131,8 +131,9 @@ def init_users():
 #@app.post('/insert_csv')
 #def insert_csv_endpoint(request: Request):
 def insert_csv(file_path=CSV_FILE_PATH):
-    file_path = request.args.get('file_path', CSV_FILE_PATH)
-    
+    #file_path = request.args.get('file_path', CSV_FILE_PATH)
+    if not file_path:
+        file_path = CSV_FILE_PATH
     conn = get_db_connection()
     cursor = conn.cursor()
     try:
@@ -154,7 +155,7 @@ def insert_csv(file_path=CSV_FILE_PATH):
 #@app.post('/move_csv')
 #def move_csv_endpoint(request: Request):
 def move_csv(file_path=CSV_FILE_PATH):
-    file_path = request.args.get('file_path', CSV_FILE_PATH)
+    #file_path = request.args.get('file_path', CSV_FILE_PATH)
     try:
         destination_path = os.path.join(DESTINATION_FOLDER, os.path.basename(file_path))
         shutil.move(file_path, destination_path)
