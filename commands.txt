@@ -73,5 +73,8 @@ curl -X POST http://localhost:9090/data -H "Content-Type: application/json" -d '
 
 curl -X POST http://localhost:9090/insert_csv?file_path=dataset.csv
 
+# Model api
+curl http://localhost:8050/status
 
+curl -X POST http://localhost:8050/retrain -d '{"n_estimators":20, "max_depth":3}'
 
