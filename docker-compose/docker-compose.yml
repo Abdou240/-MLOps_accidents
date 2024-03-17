@@ -9,12 +9,6 @@ services:
     ports:
       - target: 8080
         published: 8080
-      - target: 8081
-        published: 8081
-      - target: 8082
-        published: 8082
-    # volumes:
-    # - /home/ubuntu/MLOps_Accidents/mlruns/540651655119660427/7f767bc02a17493e95921b6f2bcebcf0/artifacts/rf_car_accidents/:/opt/ml/model
 
   mlflow:
     image: mlflow_server:latest
@@ -22,16 +16,14 @@ services:
     ports:
       - target: 8000
         published: 8000
-      - target: 8010
-        published: 5000
       # target host, published container
-    command: mlflow server --host 0.0.0.0 --port 8000
     depends_on:
       - model
     networks:
       - api_net
-#    volumes:
-#      - ./mlflow:/mlflow
+    volumes:
+      - ./mlflow:/mlflow
+    command: mlflow server --host 0.0.0.0 --port 8000
 
   api:
     image: project_api:latest
@@ -55,14 +47,6 @@ services:
     depends_on:
       - api
     privileged: true
-
-  # flask_app:
-  #   image: flask-app:latest
-  #   container_name: flask_app
-  #   networks:
-  #     - api_net
-  #   ports:
-  #     - "9090:5000"
 
   database:
     image: database_api:latest
