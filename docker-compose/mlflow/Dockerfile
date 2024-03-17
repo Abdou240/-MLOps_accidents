@@ -10,11 +10,11 @@
 
 FROM python:3.8.10
 
-ENV MLFLOW_HOME /opt/mlflow
+ENV MLFLOW_HOME /mlflow
 ENV SERVER_PORT 8000
-ENV SERVER_HOST 0.0.0.0
-ENV FILE_STORE ${MLFLOW_HOME}/fileStore
-ENV ARTIFACT_STORE ${MLFLOW_HOME}/artifactStore
+#ENV SERVER_HOST 0.0.0.0
+#ENV FILE_STORE ${MLFLOW_HOME}/fileStore
+#ENV ARTIFACT_STORE ${MLFLOW_HOME}/artifactStore
 
 RUN pip install mlflow 
 
@@ -30,8 +30,10 @@ EXPOSE ${SERVER_PORT}/tcp
 
 #VOLUME ["${MLFLOW_HOME}/scripts/", "${FILE_STORE}", "${ARTIFACT_STORE}"]
 
-ADD mlruns "${MLFLOW_HOME}/mlruns"
+ADD ./ ${MLFLOW_HOME}
 
+
+#VOLUME ./:${MLFLOW_HOME}
 WORKDIR ${MLFLOW_HOME}
 
 #ENTRYPOINT ["./scripts/run.sh"]
