@@ -138,6 +138,7 @@ def process_data(input_filepath_users, input_filepath_caract, input_filepath_pla
 
     #--Dropping columns 
     list_to_drop = ['senc','larrout','actp', 'manv', 'choc', 'nbv', 'prof', 'plan', 'Num_Acc', 'id_vehicule', 'num_veh', 'pr', 'pr1','voie', 'trajet',"secu2", "secu3",'adr', 'v1', 'lartpc','occutc','v2','vosp','locp','etatp', 'infra', 'obs' ]
+    
     df.drop(list_to_drop, axis=1, inplace=True)
 
     #--Dropping lines with NaN values
@@ -157,9 +158,13 @@ def process_data(input_filepath_users, input_filepath_caract, input_filepath_pla
     
     # --- START CHANGE ----
     #print(df.columns)
-    df = df[['catu', 'victim_age', 'lum', 'com', 'atm', 'grav']]
-    
     df['victim_age'] = df['victim_age'].round().astype('int64')
+
+    cols_4_csv = ['place', 'catu', 'grav', 'sexe', 'secu1', 'year_acc', 'victim_age', 'catv', 'obsm', 'motor', 'catr', 'circ', 'surf', 'situ', 'vma', 'jour', 'mois', 'lum', 'dep', 'com', 'agg_', 'int', 'atm', 'col', 'lat', 'long', 'hour', 'nb_victim', 'nb_vehicules']
+
+    df_complete = df[cols_4_csv]   
+    
+    df = df[['catu', 'victim_age', 'lum', 'com', 'atm', 'grav']]  
 
     #print(df.columns)
     # --- END CHANGE ----
@@ -169,17 +174,16 @@ def process_data(input_filepath_users, input_filepath_caract, input_filepath_pla
     
     X_train, X_test, y_train, y_test = train_test_split(feats, target, test_size=0.3, random_state = 42)
 
+    print(type(X_train))
     #--Filling NaN values
     # col_to_fill_na = ["surf", "circ", "col", "motor"]
     # X_train[col_to_fill_na] = X_train[col_to_fill_na].fillna(X_train[col_to_fill_na].mode().iloc[0])
     # X_test[col_to_fill_na] = X_test[col_to_fill_na].fillna(X_train[col_to_fill_na].mode().iloc[0])
 
-    # Create folder if necessary 
-    if check_existing_folder(output_folderpath) :
-        os.makedirs(output_folderpath)
+    
 
     #--Saving the dataframes to their respective output file paths
-    for file, filename in zip([X_train, X_test, y_train, y_test, df], ['X_train', 'X_test', 'y_train', 'y_test', 'dataset']):
+    for file, filename in zip([X_train, X_test, y_train, y_test, df, df_complete], ['X_train', 'X_test', 'y_train', 'y_test', 'dataset_4_feats', 'dataset']):
         output_filepath = os.path.join(output_folderpath, f'{filename}.csv')
         if check_existing_file(output_filepath):
             file.to_csv(output_filepath, index=False)

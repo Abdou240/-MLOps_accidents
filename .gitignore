@@ -105,3 +105,14 @@ my_token.txt
 *.trash
 #make_mlflow_request.py
 mlflow_python_api.py
+docker-compose/mlflow/requirements.txt
+docker-compose/mlflow/data/preprocessed/dataset_4_feats.csv
+docker-compose/mlflow/data/preprocessed/dataset.csv
+docker-compose/mlflow/data/preprocessed/X_test.csv
+docker-compose/mlflow/data/preprocessed/X_train.csv
+docker-compose/mlflow/data/preprocessed/y_test.csv
+docker-compose/mlflow/data/preprocessed/y_train.csv
+docker-compose/mlflow/data/raw/caracteristiques-2021.csv
+docker-compose/mlflow/data/raw/lieux-2021.csv
+docker-compose/mlflow/data/raw/usagers-2021.csv
+docker-compose/mlflow/data/raw/vehicules-2021.csv

@@ -1,0 +1,18 @@
+# FROM ubuntu:18.04
+# RUN apt-get update && apt-get upgrade -y && apt-get clean
+# RUN apt-get install -y curl python3.7 python3.7-dev python3.7-distutils
+# RUN update-alternatives --install /usr/bin/python python /usr/bin/python3.7 1
+# RUN update-alternatives --set python /usr/bin/python3.7
+# RUN curl -s https://bootstrap.pypa.io/get-pip.py -o get-pip.py && \
+#     python get-pip.py --force-reinstall && \
+#     rm get-pip.py
+FROM python:3.8.10
+RUN pip3 install --ignore-installed  mlflow pandas scikit-learn joblib requests==2.21.0 fastapi uvicorn
+
+#VOLUME ./:${MLFLOW_HOME}
+#ADD main.py /${MLFLOW_HOME}/api.py
+ENV MLFLOW_HOME /mlflow
+ENV SERVER_PORT 8050
+WORKDIR ${MLFLOW_HOME}
+EXPOSE ${SERVER_PORT}
+CMD uvicorn main:app --host 0.0.0.0 --port ${SERVER_PORT}

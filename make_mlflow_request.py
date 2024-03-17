@@ -33,13 +33,13 @@ for run in runs:
         print(f'{name}=', x['value'])
 
 
-# url = 'http://0.0.0.0:8000/api/2.0/mlflow/experiments/search'
-# r = requests.get(url, params= {'max_results':5})
-# print(r.text)
-# experiments = None
-# if r.status_code == 200:
-#     experiment_id = experiments = r.json()["experiments"][0]['experiment_id']
-#     print(experiments)
+url = 'http://0.0.0.0:8000/api/2.0/mlflow/experiments/search'
+r = requests.get(url, params= {'max_results':5})
+print(r.text)
+experiments = None
+if r.status_code == 200:
+    experiment_id = experiments = r.json()["experiments"][0]['experiment_id']
+    print(experiments)
 
 
 # url = 'http://0.0.0.0:8000/api/2.0/mlflow/runs/search'
@@ -50,3 +50,17 @@ for run in runs:
 # # if r.status_code == 200:
 # #     experiments = r.json()["experiments"]
 # #     print(experiments)
+
+
+response = requests.get(
+    'http://localhost:8050/status'
+)
+print(response.text)
+
+params = {'n_estimators':40, 'max_depth':8}
+
+response = requests.post(
+    'http://localhost:8050/retrain',
+    json=params
+)
+print(response.text)

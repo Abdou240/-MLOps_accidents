@@ -16,14 +16,25 @@ services:
     ports:
       - target: 8000
         published: 8000
-      # target host, published container
-    depends_on:
-      - model
+      # target host : published container
+    networks:
+      - api_net
+    volumes:
+      - ./mlflow/mlruns:/mlflow/mlruns
+    command: mlflow server --host 0.0.0.0 --port 8000
+  
+  model_api:
+    image:   model_api:latest
+    container_name: model_api
+    ports:
+      - target: 8050
+        published: 8050
+      # target host : published container
     networks:
       - api_net
     volumes:
       - ./mlflow:/mlflow
-    command: mlflow server --host 0.0.0.0 --port 8000
+    #command: mlflow server --host 0.0.0.0 --port 8000
 
   api:
     image: project_api:latest
