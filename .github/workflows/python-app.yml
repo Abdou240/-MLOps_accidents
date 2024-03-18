@@ -5,9 +5,9 @@ name: Python application
 
 on:
   push:
-    branches: [ "master" ]
+    branches: [ "daniel" ]
   pull_request:
-    branches: [ "master" ]
+    branches: [ "daniel" ]
 
 permissions:
   contents: read
@@ -37,3 +37,6 @@ jobs:
     - name: Test with pytest
       run: |
         pytest
+    - name: Run all containers
+      run: |
+        bash setup.sh
