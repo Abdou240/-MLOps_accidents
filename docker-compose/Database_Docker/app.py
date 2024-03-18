@@ -180,54 +180,65 @@ class ManageUsersRequest(BaseModel):
     username: str
     password: str
     action: str
-    new_username: str = ''
-    new_password: str = ''
-    new_permission: str = ''
+    target_username: str = ''
+    target_password: str = ''
+    target_permission: str = ''
 
+
+
+def check_admin_permission(username, password):
+    """Check if the user has admin permission."""
+    conn = get_db_connection()
+    with conn.cursor() as cursor:
+        cursor.execute("SELECT Permission FROM user_tab WHERE Username = %s AND Password = %s", (username, password))
+        permission_record = cursor.fetchone()
+    conn.close()
+    
+    if permission_record and permission_record[0].lower() == 'admin':
+        return True
+    return False
+
+def execute_user_action(action, target_username, target_password, target_permission):
+    """Execute the specified action for user management."""
+    conn = get_db_connection()
+    with conn.cursor() as cursor:
+        if action == 'add':
+            cursor.execute("INSERT INTO user_tab (Username, Password, Permission) VALUES (%s, %s, %s)", 
+                           (target_username, target_password, target_permission))
+        elif action == 'delete':
+        # First, check if the user exists
+            cursor.execute("SELECT COUNT(*) FROM user_tab WHERE Username = %s", (target_username,))
+            if cursor.fetchone()[0] == 0:
+        # User does not exist, so cannot delete
+                raise HTTPException(status_code=404, detail="User not found, cannot delete")
+            else:
+        # User exists, proceed with deletion
+                cursor.execute("DELETE FROM user_tab WHERE Username = %s", (target_username,))
+        elif action == 'modify':
+        # First, check if the user exists
+            cursor.execute("SELECT COUNT(*) FROM user_tab WHERE Username = %s", (target_username,))
+            if cursor.fetchone()[0] == 0:
+        # User does not exist, so cannot modify
+                raise HTTPException(status_code=404, detail="User not found, cannot modify")
+            else:
+        # User exists, proceed with modification
+                cursor.execute("UPDATE user_tab SET Password = %s, Permission = %s WHERE Username = %s", (target_password, target_permission, target_username))
+        conn.commit()
+    conn.close()
 
 @app.post("/admin/manage_users")
-async def manage_users(request: Request):
-    data = await request.json()
-    # username = data['username']
-    # password = data['password']
-    action = data['action']
+async def manage_users(request_data: ManageUsersRequest):
+    if not request_data.username or not request_data.password:
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Missing credentials")
 
-    # if not username or not password:
-    #     raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Missing credentials")
+    if not check_admin_permission(request_data.username, request_data.password):
+        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Unauthorized")
+
     try:
-        conn = get_db_connection()
-        cursor = conn.cursor()
-        # cursor.execute("SELECT Permission FROM user_tab WHERE Username = %s AND Password = %s", (username, password))
-        # permission_record = cursor.fetchone()
-
-        # if not permission_record or permission_record[0].lower() != 'admin':
-        #     raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Unauthorized")
-
-        if action == 'add':
-            new_username = data['new_username']
-            new_password = data['new_password']
-            new_permission = data['new_permission']
-            cursor.execute(f"INSERT INTO user_tab (Username, Password, Permission) VALUES ('{new_username}', '{new_password}', '{new_permission}')")
-        elif action == 'delete':
-            target_username = data['target_username']
-            cursor.execute(f"DELETE FROM user_tab WHERE Username = '{target_username}'")
-        elif action == 'modify':
-            target_username = data['target_username']
-            new_username = data['new_username']
-            new_password = data['new_password']
-            new_permission = data['new_permission']
-            cursor.execute(f"UPDATE user_tab SET Password = '{new_password}', Permission = '{new_permission}', Username = '{new_username}' WHERE Username = '{target_username}'")
-        else:
-            raise ValueError("Invalid action specified")
-
-        conn.commit()
-        message = f"Action '{action}' completed successfully for user: {data['target_username'] if 'target_username' in data.keys() else data['new_username']}"
+        execute_user_action(request_data.action, request_data.target_username, request_data.target_password, request_data.target_permission)
+        message = f"Action '{request_data.action}' completed successfully for user: {request_data.target_username}"
     except Exception as e:
-        conn.rollback()
-        raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail=f"Error executing '{action}': {str(e)}")
-    finally:
-        cursor.close()
-        conn.close()
+        raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail=f"Error executing '{request_data.action}': {str(e)}")
 
     return {"message": message}
 
@@ -242,39 +253,24 @@ def get_data_():
     conn.close()
     return jsonable_encoder(data)
 
-@app.post('/data')
-async def get_data(request: Request):
-    data = await request.json()  # Get data from POST request
-    query = data['query']  # Extract query from the data
 
+# Define a Pydantic model for the expected request body
+class QueryData(BaseModel):
+    query: str
+
+@app.post('/data')
+def execute_query(data: QueryData):
     # Basic validation for the query input
-    if not query:
-        return jsonable_encoder({'error': 'No query provided'}), 400
+    if not data.query:
+        return JSONResponse(status_code=status.HTTP_400_BAD_REQUEST, content=jsonable_encoder({'error': 'No query provided'}))
 
     try:
         conn = get_db_connection()
         cursor = conn.cursor(cursor_factory=RealDictCursor)
-        cursor.execute(query)  # Execute the query provided by the user
-        data = cursor.fetchall()
+        cursor.execute(data.query)  # Execute the query provided by the user
+        fetched_data = cursor.fetchall()
         cursor.close()
         conn.close()
-        return jsonable_encoder(data)
+        return fetched_data
     except Exception as e:
-        return jsonable_encoder({'error': 'Failed to execute query', 'details': str(e)}), 500
-
-#@app.post('/data')
-#def execute_query(data: QueryData):
-#    # Basic validation for the query input
-#    if not data.query:
-#        return JSONResponse(status_code=status.HTTP_400_BAD_REQUEST, content=jsonable_encoder({'error': 'No query provided'}))#
-#
-#   try:
-#        conn = get_db_connection()
-#        cursor = conn.cursor(cursor_factory=RealDictCursor)
-#       cursor.execute(data.query)  # Execute the query provided by the user
-#        fetched_data = cursor.fetchall()
-#        cursor.close()
-#        conn.close()
-#        return fetched_data
-#    except Exception as e:
-#        return JSONResponse(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, content=jsonable_encoder({'error': 'Failed to execute query', 'details': str(e)}))
+        return JSONResponse(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, content=jsonable_encoder({'error': 'Failed to execute query', 'details': str(e)}))

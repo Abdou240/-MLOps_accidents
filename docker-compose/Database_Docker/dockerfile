@@ -5,9 +5,6 @@ FROM python:3.8.10
 RUN apt-get update && apt-get install -y postgresql postgresql-contrib && \
     rm -rf /var/lib/apt/lists/*
 
-# Set environment variables
-# ENV FLASK_APP=app.py
-# ENV FLASK_RUN_HOST=0.0.0.0
 #Set environment variables
 ENV POSTGRES_PASSWORD="n-]23kLr92Zz"
 ENV POSTGRES_DB="accidents_db"
@@ -16,12 +13,12 @@ ENV POSTGRES_HOST=localhost
 ENV POSTGRES_PORT=5432
 
 # Automatically start postgresql service when the container starts
-#RUN echo "service postgresql start" >> ~/.bashrc
+RUN echo "service postgresql start" >> ~/.bashrc
 
 # Create a PostgreSQL role named `yourUsername` with 'yourPassword' as the password and
 # then create a database `yourDatabaseName` owned by the `yourUsername` role.
 RUN service postgresql start && \
-    su - postgres -c "psql -c \"CREATE USER $POSTGRES_USER WITH PASSWORD '$POSTGRES_PASSWORD';\"" && \
+    su - postgres -c "psql -c \"CREATE USER $POSTGRES_USER WITH SUPERUSER PASSWORD '$POSTGRES_PASSWORD';\"" && \
     su - postgres -c "createdb -O $POSTGRES_USER $POSTGRES_DB" && \
     service postgresql stop
 
@@ -38,11 +35,11 @@ RUN pip install --no-cache-dir -r requirements.txt
 # Expose the port the app runs on
 EXPOSE 9090
 
-# Copy entrypoint script into the container
-COPY entrypoint.sh /usr/local/bin/
-
-# Make entrypoint script executable
-RUN chmod +x /usr/local/bin/entrypoint.sh
-
-# Start PostgreSQL service, run your Python script (Flac), and keep the container running
-CMD /usr/local/bin/entrypoint.sh
+# - Starts the PostgreSQL service
+# - Waits for a few seconds to ensure PostgreSQL is ready
+# - Runs the application with Uvicorn
+CMD service postgresql start && \
+    echo "Waiting for PostgreSQL to start..." && \
+    sleep 10 && \
+    uvicorn app:app --host 0.0.0.0 --port 9090 && \
+    tail -f /dev/null
