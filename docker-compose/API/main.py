@@ -47,7 +47,7 @@ def stats_model():
 	# Port of mlflow is 8000
 	# In orchestration change 0.0.0.0 to mlflow
 
-	MLFLOW_TRACKING_URI = "http://mlfow:8000"
+	MLFLOW_TRACKING_URI = "http://mlflow:8000"
 
 	# Set the MLflow tracking URI if it's not set already
 	mlflow.set_tracking_uri(MLFLOW_TRACKING_URI)  # Replace with your MLflow server URI
