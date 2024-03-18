@@ -42,34 +42,39 @@ async def retrain_model(request: Request):
 		return 'Success'
 
 @app.get("/admin/model/stats")
-def stats_model():
+async def stats_model(request: Request):
+	query = await request.json()
+	try:
+		auth('admin', query['auth'])
+	except ValueError as err:
+		raise HTTPException(status_code=404, detail=f'{err}')
+	else:
+		# Port of mlflow is 8000
+		# In orchestration change 0.0.0.0 to mlflow
 
-	# Port of mlflow is 8000
-	# In orchestration change 0.0.0.0 to mlflow
+		MLFLOW_TRACKING_URI = "http://mlflow:8000"
 
-	MLFLOW_TRACKING_URI = "http://mlflow:8000"
+		# Set the MLflow tracking URI if it's not set already
+		mlflow.set_tracking_uri(MLFLOW_TRACKING_URI)  # Replace with your MLflow server URI
 
-	# Set the MLflow tracking URI if it's not set already
-	mlflow.set_tracking_uri(MLFLOW_TRACKING_URI)  # Replace with your MLflow server URI
+		# List all runs using mlflow.search_runs()
+		runs = mlflow.search_runs(search_all_experiments=True)
+		run_res = {}
+		for run in runs.iterrows():
+			run_id = run[1]['run_id']
+			experiment_id = run[1]['experiment_id']
 
-	# List all runs using mlflow.search_runs()
-	runs = mlflow.search_runs(search_all_experiments=True)
-	run_res = {}
-	for run in runs.iterrows():
-		run_id = run[1]['run_id']
-		experiment_id = run[1]['experiment_id']
+			# Get run details using mlflow.get_run()
+			run_details = mlflow.get_run(run_id)
 
-		# Get run details using mlflow.get_run()
-		run_details = mlflow.get_run(run_id)
+			# Extract metrics
+			run_name = run_details.data.tags['mlflow.runName']
+			params=run_details.data.params
+			metrics = run_details.data.metrics
 
-		# Extract metrics
-		run_name = run_details.data.tags['mlflow.runName']
-		params=run_details.data.params
-		metrics = run_details.data.metrics
-
-		run_res[run_name] = {'params': params, 'metrics': metrics}
-	return run_res
-	
+			run_res[run_name] = {'params': params, 'metrics': metrics}
+		return run_res
+		
 
 
 @app.get("/admin/users/list")

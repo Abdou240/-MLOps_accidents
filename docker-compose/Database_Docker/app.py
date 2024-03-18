@@ -181,8 +181,9 @@ class ManageUsersRequest(BaseModel):
     password: str
     action: str
     target_username: str = ''
-    target_password: str = ''
-    target_permission: str = ''
+    new_password: str = ''
+    new_permission: str = ''
+    new_username: str = ''
 
 
 
@@ -198,13 +199,13 @@ def check_admin_permission(username, password):
         return True
     return False
 
-def execute_user_action(action, target_username, target_password, target_permission):
+def execute_user_action(action, target_username, new_password, new_permission, new_username):
     """Execute the specified action for user management."""
     conn = get_db_connection()
     with conn.cursor() as cursor:
         if action == 'add':
             cursor.execute("INSERT INTO user_tab (Username, Password, Permission) VALUES (%s, %s, %s)", 
-                           (target_username, target_password, target_permission))
+                           (new_username, new_password, new_permission))
         elif action == 'delete':
         # First, check if the user exists
             cursor.execute("SELECT COUNT(*) FROM user_tab WHERE Username = %s", (target_username,))
@@ -222,7 +223,7 @@ def execute_user_action(action, target_username, target_password, target_permiss
                 raise HTTPException(status_code=404, detail="User not found, cannot modify")
             else:
         # User exists, proceed with modification
-                cursor.execute("UPDATE user_tab SET Password = %s, Permission = %s WHERE Username = %s", (target_password, target_permission, target_username))
+                cursor.execute("UPDATE user_tab SET Username = %s Password = %s, Permission = %s WHERE Username = %s", (new_username, new_password, new_permission, target_username))
         conn.commit()
     conn.close()
 
@@ -235,7 +236,7 @@ async def manage_users(request_data: ManageUsersRequest):
         raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Unauthorized")
 
     try:
-        execute_user_action(request_data.action, request_data.target_username, request_data.target_password, request_data.target_permission)
+        execute_user_action(request_data.action, request_data.target_username, request_data.new_password, request_data.new_permission, request_data.new_username)
         message = f"Action '{request_data.action}' completed successfully for user: {request_data.target_username}"
     except Exception as e:
         raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail=f"Error executing '{request_data.action}': {str(e)}")

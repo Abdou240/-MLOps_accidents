@@ -144,23 +144,21 @@ if nav == 'API Endpoints':
 					st.success('Model retrained successfully!', icon="✅")
 			with st.spinner('Pulling model stats...'):
 				res = requests.get(f'http://api:8090{user}{endpoint}/stats', json={'auth': auth})
-				print(res.text)
-				st.write(res.json())
-				# if res.status_code == 404:
-				# 	st.warning(res.json()['detail'], icon="⚠️")
-				# else:
-				# 	for key in res.json():
-				# 		run = res.json()[key]
-				# 		print('RUN', run)
-				# 		with st.expander(f'Run: {key}'):
-				# 			params, metrics = st.tabs(['Parameters', 'Metrics'])
-							
-				# 			with params:
-				# 				df = pd.DataFrame(run['params'])
-				# 				st.dataframe(df)
-				# 			with metrics:
-				# 				df = pd.DataFrame(run['metrics'])
-				# 				st.dataframe(df)
+				if res.status_code == 404:
+					st.warning(res.json()['detail'], icon="⚠️")
+				else:
+					for key in res.json():
+						run = res.json()[key]
+						with st.expander(f'{key}'):
+							params, metrics = st.tabs(['Parameters', 'Metrics'])
+							with params:
+								data = {k: [val] for k, val in zip(run['params'].keys(), run['params'].values())}
+								df = pd.DataFrame(data)
+								st.dataframe(df)
+							with metrics:
+								data = {k: [val] for k, val in zip(run['metrics'].keys(), run['metrics'].values())}
+								df = pd.DataFrame(data)
+								st.dataframe(df)
 	
 	
 
