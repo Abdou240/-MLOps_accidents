@@ -28,22 +28,22 @@ def auth(user, auth):
 	elif res[0]['permission'].lower() != user:
 		raise ValueError('Incorrect Permissions')
 
-# @app.post("/admin/model/retrain")
-# def retrain_model(years=5):
-	# TODO Send request to the model container to trigger retraining no n years of recent data
+@app.post("/admin/model/retrain")
+async def retrain_model(request: Request):
+	query = await request.json()
+	params={'n_estimators':40, 'max_depth':8}
+	try:
+		auth('admin', query['auth'])
+	except ValueError as err:
+		raise HTTPException(status_code=404, detail=f'{err}')
+	else:
+		res = requests.post('http://model_api:8050/retrain', json=params)
+		return 'Success'
 
 # @app.get("/admin/model/stats")
 # def stats_model():
 	# TODO Get model performance metrics, request from the model container
 
-# @app.get("/admin/model/predict")
-# async def predict_model(request: Request):
-# 	# Request a specific prediction from the model using json
-# 	features = await request.json()
-# 	input_df = pd.DataFrame([features])
-# 	# TODO pull model from model container instead
-# 	prediction = loaded_model.predict(input_df)
-# 	return {'predictions': [x.item() for x in list(prediction)]}
 
 @app.get("/admin/users/list")
 async def users_list(request: Request):
