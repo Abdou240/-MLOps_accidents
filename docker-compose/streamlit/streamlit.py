@@ -40,7 +40,13 @@ if nav == 'API Endpoints':
 			self.color = ['green', 'orange', 'red', 'gray'][pred]
 			self.txt = ['Safe', 'Risky', 'Very Risky', 'Deadly'][pred]
 			self.progress = (pred + 1) * 25 - 1
-			
+			st.markdown(f"""
+			<style>
+			.stProgress .st-bo {{
+				background-color: {self.color};
+			}}
+			</style>
+			""", unsafe_allow_html=True)
 			self.bar = obj.progress(self.progress, text=f'Risk is predicted at: :{self.color}[{self.txt}]')
 
 	file = open("./com.csv", "r")
@@ -130,11 +136,27 @@ if nav == 'API Endpoints':
 			col1, col2 = st.columns([5, 1])
 			col1.subheader('Random Forest Classifier')
 			if col2.button('retrain'):
-				res = requests.post(f'http://api:8090{user}{endpoint}/retrain', json={'auth': auth})
+				with st.spinner('Training model...'):
+					res = requests.post(f'http://api:8090{user}{endpoint}/retrain', json={'auth': auth})
 				if res.status_code != 200:
 					st.warning(res.json()['detail'], icon="⚠️")
 				else:
 					st.success('Model retrained successfully!', icon="✅")
+			with st.spinner('Pulling model stats...'):
+				res = requests.get(f'http://api:8090{user}{endpoint}/stats', json={'auth': auth})
+				if res.status_code == 404:
+					st.warning(res.json()['detail'], icon="⚠️")
+				else:
+					for run in res.json():
+						with st.expander(f'Run: {run["key"]}'):
+							params, metrics = st.tabs(['Parameters', 'Metrics'])
+							
+							with params:
+								df = pd.DataFrame(run['value']['params'])
+								st.dataframe(df)
+							with metrics:
+								df = pd.DataFrame(run['value']['metrics'])
+								st.dataframe(df)
 	
 	
 

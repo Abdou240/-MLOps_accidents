@@ -6,7 +6,7 @@ RUN update-alternatives --set python /usr/bin/python3.7
 RUN curl -s https://bootstrap.pypa.io/get-pip.py -o get-pip.py && \
     python get-pip.py --force-reinstall && \
     rm get-pip.py
-RUN pip3 install joblib requests==2.21.0 fastapi uvicorn==0.17.0
+RUN pip3 install joblib requests==2.21.0 fastapi uvicorn==0.17.0 mlflow
 ADD main.py /my_api/api.py
 ADD v_commune_2023.csv /my_api/com.csv
 WORKDIR /my_api/

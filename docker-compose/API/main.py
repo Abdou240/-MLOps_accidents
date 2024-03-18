@@ -2,6 +2,7 @@ from typing import Union, Any
 import joblib
 import csv
 import requests
+import mlflow
 
 from fastapi import FastAPI, Body, Request, HTTPException
 
@@ -40,9 +41,35 @@ async def retrain_model(request: Request):
 		res = requests.post('http://model_api:8050/retrain', json=params)
 		return 'Success'
 
-# @app.get("/admin/model/stats")
-# def stats_model():
-	# TODO Get model performance metrics, request from the model container
+@app.get("/admin/model/stats")
+def stats_model():
+
+	# Port of mlflow is 8000
+	# In orchestration change 0.0.0.0 to mlflow
+
+	MLFLOW_TRACKING_URI = "http://mlfow:8000"
+
+	# Set the MLflow tracking URI if it's not set already
+	mlflow.set_tracking_uri(MLFLOW_TRACKING_URI)  # Replace with your MLflow server URI
+
+	# List all runs using mlflow.search_runs()
+	runs = mlflow.search_runs(search_all_experiments=True)
+	run_res = {}
+	for run in runs.iterrows():
+		run_id = run[1]['run_id']
+		experiment_id = run[1]['experiment_id']
+
+		# Get run details using mlflow.get_run()
+		run_details = mlflow.get_run(run_id)
+
+		# Extract metrics
+		run_name = run_details.data.tags['mlflow.runName']
+		params=run_details.data.params
+		metrics = run_details.data.metrics
+
+		run_res[run_name] = {'params': params, 'metrics': metrics}
+	return run_res
+	
 
 
 @app.get("/admin/users/list")
