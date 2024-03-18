@@ -3,8 +3,9 @@ import requests
 import pandas as pd
 
 navigation = ['Project Presentations', 'API Endpoints']
+menu = st.sidebar.expander('Menu')
 
-nav = st.sidebar.radio('Menu', navigation)
+nav = menu.radio('Menu', navigation, label_visibility='collapsed')
 endpoint = user = method = ''
 if nav == 'API Endpoints':
 	col1, col2 = st.sidebar.columns([1,8])
