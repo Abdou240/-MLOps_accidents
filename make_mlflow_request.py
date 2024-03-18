@@ -1,66 +1,58 @@
-import requests
-
-runs = ['f439c730d3794df08de67c18d02ad1d6',
-        '7f767bc02a17493e95921b6f2bcebcf0',
-        'f8c4776c3c4042c0b8d099dcc8d23eb2']
-
-for run in runs:
-    end_pont='2.0/mlflow/runs/get'
-    params = {'run_id':run}
-
+def check_model_api_status():
+    import requests
+    # Port of model api is 8050
+    # In orchestration change localhost to model_api
     response = requests.get(
-        'http://0.0.0.0:8000/api/'+end_pont,
-        headers={"Content-Type":'application/json'},
-        params=params
+        'http://localhost:8050/status'
     )
-    #print(response.text)
-    experiment_details = response.json()
-    #print('\n\n', run)
-    #print(experiment_details)
-    run_name = experiment_details['run']['info']['run_name']
-    print('\n\nRun name', run_name)
-    print('Run id', run)
-    print('\nMetrics')
-    metrics = experiment_details['run']['data']['metrics']
-    for x in metrics:
-        #print(x)
-        name = x['key']
-        print(f'{name}=', x['value'])
-    print('\nParams')
-    params = experiment_details['run']['data']['params']
-    for x in params:
-        name = x['key']
-        print(f'{name}=', x['value'])
+    print(response.text)
 
 
-url = 'http://0.0.0.0:8000/api/2.0/mlflow/experiments/search'
-r = requests.get(url, params= {'max_results':5})
-print(r.text)
-experiments = None
-if r.status_code == 200:
-    experiment_id = experiments = r.json()["experiments"][0]['experiment_id']
-    print(experiments)
+def retrain_model():
+    import requests
+    # Define different number of estimators or max_depth
+    params = {'n_estimators':40, 'max_depth':15}
+    # Port of model api is 8050
+    # In orchestration change localhost to model_api
+    response = requests.post(
+        'http://localhost:8050/retrain',
+        json=params
+    )
+    print(response.text)
 
 
-# url = 'http://0.0.0.0:8000/api/2.0/mlflow/runs/search'
-# r = requests.post(url, headers={"Content-Type":'application/json'},
-#                   params={'experiment_id':experiment_id, 'filter':'*'})
-# print(r.text)
-# experiments = None
-# # if r.status_code == 200:
-# #     experiments = r.json()["experiments"]
-# #     print(experiments)
+def get_runs_metrics():
+    import mlflow
+    # Port of mlflow is 8000
+    # In orchestration change 0.0.0.0 to mlflow
+
+    MLFLOW_TRACKING_URI = "http://0.0.0.0:8000"
+
+    # Set the MLflow tracking URI if it's not set already
+    mlflow.set_tracking_uri(MLFLOW_TRACKING_URI)  # Replace with your MLflow server URI
+
+    # List all runs using mlflow.search_runs()
+    runs = mlflow.search_runs(search_all_experiments=True)
+    for run in runs.iterrows():
+        run_id = run[1]['run_id']
+        experiment_id = run[1]['experiment_id']
+        
+        # Get run details using mlflow.get_run()
+        run_details = mlflow.get_run(run_id)
+        # print(run_details)
+        
+        # Extract metrics
+        run_name = run_details.data.tags['mlflow.runName']
+        params=run_details.data.params
+        metrics = run_details.data.metrics        
+        
+        print('\n',run_name)
+        print('\t', 'Params:', params)
+        print('\t', 'Metrics: ', metrics)
+        
 
 
-response = requests.get(
-    'http://localhost:8050/status'
-)
-print(response.text)
-
-params = {'n_estimators':40, 'max_depth':8}
-
-response = requests.post(
-    'http://localhost:8050/retrain',
-    json=params
-)
-print(response.text)
+if __name__ == "__main__":
+    check_model_api_status()
+    retrain_model()
+    get_runs_metrics()
