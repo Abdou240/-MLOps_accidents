@@ -8,14 +8,14 @@ menu = st.sidebar.expander('Menu')
 nav = menu.radio('Menu', navigation, label_visibility='collapsed')
 endpoint = user = method = ''
 if nav == 'API Endpoints':
-	col1, col2 = st.sidebar.columns([1,8])
+	col1, col2 = menu.columns([1,8])
 	users = ['/admin', '/superuser', '/gen_user', '/status']
 	endpoints = {'/status': ['/api', '/model', '/database'], '/admin': ['/model', '/users'], '/gen_user': ['/query_location', '/risky_locations'], '/superuser': ['/gen_stats', '/stats_query']}
 	user = col2.radio('users', users, label_visibility='collapsed')
-	if st.button('Create table'):
-		res = requests.get('http://database:9090/create_table')
-	if st.button('Add Users'):
-		res = requests.get('http://database:9090/init_users')
+	# if st.button('Create table'):
+	# 	res = requests.get('http://database:9090/create_table')
+	# if st.button('Add Users'):
+	# 	res = requests.get('http://database:9090/init_users')
 
 	feats = {
 		'catu': {
@@ -40,7 +40,13 @@ if nav == 'API Endpoints':
 			self.color = ['green', 'orange', 'red', 'gray'][pred]
 			self.txt = ['Safe', 'Risky', 'Very Risky', 'Deadly'][pred]
 			self.progress = (pred + 1) * 25 - 1
-			
+			st.markdown(f"""
+			<style>
+			.stProgress .st-bo {{
+				background-color: {self.color};
+			}}
+			</style>
+			""", unsafe_allow_html=True)
 			self.bar = obj.progress(self.progress, text=f'Risk is predicted at: :{self.color}[{self.txt}]')
 
 	file = open("./com.csv", "r")
@@ -126,7 +132,33 @@ if nav == 'API Endpoints':
 						res = requests.post(f'http://api:8090{user}/users/remove', json={'auth': auth, 'query': query})
 						st.rerun()
 
-
+		if endpoint == '/model':
+			col1, col2 = st.columns([5, 1])
+			col1.subheader('Random Forest Classifier')
+			if col2.button('retrain'):
+				with st.spinner('Training model...'):
+					res = requests.post(f'http://api:8090{user}{endpoint}/retrain', json={'auth': auth})
+				if res.status_code != 200:
+					st.warning(res.json()['detail'], icon="⚠️")
+				else:
+					st.success('Model retrained successfully!', icon="✅")
+			with st.spinner('Pulling model stats...'):
+				res = requests.get(f'http://api:8090{user}{endpoint}/stats', json={'auth': auth})
+				if res.status_code == 404:
+					st.warning(res.json()['detail'], icon="⚠️")
+				else:
+					for key in res.json():
+						run = res.json()[key]
+						with st.expander(f'{key}'):
+							params, metrics = st.tabs(['Parameters', 'Metrics'])
+							with params:
+								data = {k: [val] for k, val in zip(run['params'].keys(), run['params'].values())}
+								df = pd.DataFrame(data)
+								st.dataframe(df)
+							with metrics:
+								data = {k: [val] for k, val in zip(run['metrics'].keys(), run['metrics'].values())}
+								df = pd.DataFrame(data)
+								st.dataframe(df)
 	
 	
 
@@ -160,7 +192,7 @@ if nav == 'API Endpoints':
 			feat2 = col2.number_input('User Age', min_value=0, max_value=120, value=20)
 			feat3 = col3.selectbox('Lighting Conditions', list(feats['lum'].keys()))
 			feat4 = col4.selectbox('Municipality', coms_label)
-			feat5 = col5.selectbox('Atmospheric Conditions', list(feats['atm'].keys()))
+			feat5 = col5.selectbox('Atmos. Conditions', list(feats['atm'].keys()))
 			features = {'catu': feats['catu'][feat1], 'victim_age': feat2, 'lum': feats['lum'][feat3], 'com': coms_code[coms_label.index(feat4)], 'atm': feats['atm'][feat5]}
 			search = st.button('Search')
 			if search:
@@ -179,7 +211,7 @@ if nav == 'API Endpoints':
 			feat1 = col1.selectbox('User Category', list(feats['catu'].keys()))
 			feat2 = col2.number_input('User Age', min_value=0, max_value=120, value=20)
 			feat3 = col3.selectbox('Lighting Conditions', list(feats['lum'].keys()))
-			feat4 = col4.selectbox('Atmospheric Conditions', list(feats['atm'].keys()))
+			feat4 = col4.selectbox('Atmos. Conditions', list(feats['atm'].keys()))
 			features = {'catu': feats['catu'][feat1], 'victim_age': feat2, 'lum': feats['lum'][feat3], 'atm': feats['atm'][feat4]}
 			top_loc = st.number_input('Top n locations', min_value=1, max_value=100, value=10)
 			search = st.button('Search')
