@@ -2,6 +2,7 @@ from typing import Union, Any
 import joblib
 import csv
 import requests
+import mlflow
 
 from fastapi import FastAPI, Body, Request, HTTPException
 
@@ -28,22 +29,53 @@ def auth(user, auth):
 	elif res[0]['permission'].lower() != user:
 		raise ValueError('Incorrect Permissions')
 
-# @app.post("/admin/model/retrain")
-# def retrain_model(years=5):
-	# TODO Send request to the model container to trigger retraining no n years of recent data
+@app.post("/admin/model/retrain")
+async def retrain_model(request: Request):
+	query = await request.json()
+	params={'n_estimators':40, 'max_depth':8}
+	try:
+		auth('admin', query['auth'])
+	except ValueError as err:
+		raise HTTPException(status_code=404, detail=f'{err}')
+	else:
+		res = requests.post('http://model_api:8050/retrain', json=params)
+		return 'Success'
 
-# @app.get("/admin/model/stats")
-# def stats_model():
-	# TODO Get model performance metrics, request from the model container
+@app.get("/admin/model/stats")
+async def stats_model(request: Request):
+	query = await request.json()
+	try:
+		auth('admin', query['auth'])
+	except ValueError as err:
+		raise HTTPException(status_code=404, detail=f'{err}')
+	else:
+		# Port of mlflow is 8000
+		# In orchestration change 0.0.0.0 to mlflow
 
-# @app.get("/admin/model/predict")
-# async def predict_model(request: Request):
-# 	# Request a specific prediction from the model using json
-# 	features = await request.json()
-# 	input_df = pd.DataFrame([features])
-# 	# TODO pull model from model container instead
-# 	prediction = loaded_model.predict(input_df)
-# 	return {'predictions': [x.item() for x in list(prediction)]}
+		MLFLOW_TRACKING_URI = "http://mlflow:8000"
+
+		# Set the MLflow tracking URI if it's not set already
+		mlflow.set_tracking_uri(MLFLOW_TRACKING_URI)  # Replace with your MLflow server URI
+
+		# List all runs using mlflow.search_runs()
+		runs = mlflow.search_runs(search_all_experiments=True)
+		run_res = {}
+		for run in runs.iterrows():
+			run_id = run[1]['run_id']
+			experiment_id = run[1]['experiment_id']
+
+			# Get run details using mlflow.get_run()
+			run_details = mlflow.get_run(run_id)
+
+			# Extract metrics
+			run_name = run_details.data.tags['mlflow.runName']
+			params=run_details.data.params
+			metrics = run_details.data.metrics
+
+			run_res[run_name] = {'params': params, 'metrics': metrics}
+		return run_res
+		
+
 
 @app.get("/admin/users/list")
 async def users_list(request: Request):

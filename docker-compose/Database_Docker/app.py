@@ -180,6 +180,7 @@ class ManageUsersRequest(BaseModel):
    # username: str
   #  password: str
     action: str
+
     current_username: str = ''  # Existing username of the user to modify
     target_username: str = ''  # New desired username for the user
     target_password: str = ''
@@ -199,13 +200,15 @@ def check_admin_permission(username, password):
         return True
     return False
 
+
 def execute_user_action(action, current_username, target_username, target_password, target_permission):
+
     """Execute the specified action for user management."""
     conn = get_db_connection()
     with conn.cursor() as cursor:
         if action == 'add':
             cursor.execute("INSERT INTO user_tab (Username, Password, Permission) VALUES (%s, %s, %s)", 
-                           (target_username, target_password, target_permission))
+                           (new_username, new_password, new_permission))
         elif action == 'delete':
         # First, check if the user exists
             cursor.execute("SELECT COUNT(*) FROM user_tab WHERE Username = %s", (current_username,))
@@ -223,8 +226,10 @@ def execute_user_action(action, current_username, target_username, target_passwo
                 raise HTTPException(status_code=404, detail="User not found, cannot modify")
             else:
         # User exists, proceed with modification
+
                 #cursor.execute("UPDATE user_tab SET Password = %s, Permission = %s WHERE Username = %s", (target_password, target_permission, target_username))
                 cursor.execute("UPDATE user_tab SET Username = %s, Password = %s, Permission = %s WHERE Username = %s", (target_username, target_password, target_permission, current_username))
+
         conn.commit()
     conn.close()
 
@@ -247,6 +252,7 @@ async def manage_users(request_data: ManageUsersRequest):
         message = f"Action '{request_data.action}' completed successfully."
     except HTTPException as http_exc:
         raise http_exc
+
     except Exception as e:
         raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail=f"Error executing '{request_data.action}': {str(e)}")
 
