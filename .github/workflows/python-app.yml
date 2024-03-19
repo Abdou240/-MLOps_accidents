@@ -41,7 +41,7 @@ jobs:
       run: |
         bash setup.sh
 
-    - name: Run all containers
+    - name: Run tests
       run: |
         python3 workflow_test.py
 
