@@ -43,7 +43,7 @@ jobs:
 
     - name: Run curl tests
       run: |
-        curl http://localhost:8050/status 
+        curl http://model_api:8050/status 
 
     - name: Run tests
       run: |
