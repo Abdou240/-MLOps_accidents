@@ -137,10 +137,10 @@ async def users_remove(request: Request):
 		raise HTTPException(status_code=404, detail=f'{err}')
 	else:
 		query['query']['action'] = 'delete'
-		users = query['query']['target_username']
-		for user in users:
+		usernames = query['query']['current_username']
+		for username in usernames:
 			try:
-				query['query']['target_username'] = user
+				query['query']['current_username'] = username
 				res = requests.post('http://database:9090/admin/manage_users', json=query['query'])
 				res = res.json()
 				
