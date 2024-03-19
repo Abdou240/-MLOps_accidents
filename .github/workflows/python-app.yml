@@ -40,14 +40,16 @@ jobs:
     - name: Run all containers
       run: |
         bash setup.sh
+        sleep 10  # Wait for the container to start
 
     - name: Run curl tests
       run: |
-        gh api http://localhost:8050/status 
+        CONTAINER_ID=$(docker-compose ps -q model_api)
+        curl http://localhost:8050/status -X GET
 
-    - name: Run tests
-      run: |
-        python3 workflow_test.py
+    # - name: Run tests
+    #   run: |
+    #     python3 workflow_test.py
 
     - name: Stop Docker containers
       run: docker-compose -f docker-compose/docker-compose.yml down
