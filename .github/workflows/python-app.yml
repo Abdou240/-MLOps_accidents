@@ -44,7 +44,7 @@ jobs:
 
     - name: Run curl tests
       run: |
-        CONTAINER_ID=$(docker-compose ps -q model_api)
+        CONTAINER_ID=$(docker-compose -f docker-compose/docker-compose.yml ps -q model_api)
         curl http://localhost:8050/status -X GET
 
     # - name: Run tests
