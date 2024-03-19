@@ -99,10 +99,10 @@ if nav == 'API Endpoints':
 				query = {}
 				if len(selection) == 0:
 					c1, c2, c3 = st.columns(3)
-					query['new_username'] = c1.text_input('Username', key='/admin/users_username')
-					query['new_password'] = c2.text_input('Password', key='/admin/users_password')
-					query['new_permission'] = c3.selectbox('Permission', ['Admin', 'Superuser'])
-					if query['new_username'] in users['username']:
+					query['target_username'] = c1.text_input('Username', key='/admin/users_username')
+					query['target_password'] = c2.text_input('Password', key='/admin/users_password')
+					query['target_permission'] = c3.selectbox('Permission', ['Admin', 'Superuser'])
+					if query['target_username'] in users['username']:
 						st.warning('Username already in use', icon="⚠️")
 					else:
 						if st.button('Add User'):
@@ -114,21 +114,21 @@ if nav == 'API Endpoints':
 
 				if len(selection) == 1:
 					c1, c2, c3 = st.columns(3)
-					query['new_username'] = c1.text_input('Username', key='/admin/users_username', value=selection.loc[0, 'username'])
-					query['new_password'] = c2.text_input('Password', key='/admin/users_password', value=selection.loc[0, 'password'])
-					query['new_permission'] = c3.selectbox('Permission', ['Admin', 'Superuser'], index=(0 if selection.loc[0, 'permission'] == 'Admin' else 1))
-					if query['new_username'] in users['username']:
+					query['target_username'] = c1.text_input('Username', key='/admin/users_username', value=selection.loc[0, 'username'])
+					query['target_password'] = c2.text_input('Password', key='/admin/users_password', value=selection.loc[0, 'password'])
+					query['target_permission'] = c3.selectbox('Permission', ['Admin', 'Superuser'], index=(0 if selection.loc[0, 'permission'] == 'Admin' else 1))
+					if query['target_username'] in users['username']:
 						st.warning('Username already in use', icon="⚠️")
 					else:
 						if st.button('Update User'):
-							query['target_username'] = selection.loc[0, 'username']
+							query['current_username'] = selection.loc[0, 'username']
 							res = requests.post(f'http://api:8090{user}/users/update', json={'auth': auth, 'query': query})
 							st.rerun()
 
 
 				if len(selection) >= 1:
 					if st.button(f'Delete {len(selection)} ' + ('Users' if len(selection) > 1 else 'User')):
-						query['target_username'] = list(selection['username'].values())
+						query['current_username'] = list(selection['username'].values)
 						res = requests.post(f'http://api:8090{user}/users/remove', json={'auth': auth, 'query': query})
 						st.rerun()
 

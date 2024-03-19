@@ -208,7 +208,7 @@ def execute_user_action(action, current_username, target_username, target_passwo
     with conn.cursor() as cursor:
         if action == 'add':
             cursor.execute("INSERT INTO user_tab (Username, Password, Permission) VALUES (%s, %s, %s)", 
-                           (new_username, new_password, new_permission))
+                           (target_username, target_password, target_permission))
         elif action == 'delete':
         # First, check if the user exists
             cursor.execute("SELECT COUNT(*) FROM user_tab WHERE Username = %s", (current_username,))
