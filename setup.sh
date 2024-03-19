@@ -12,4 +12,4 @@ docker image build -f ./docker-compose/mlflow/Dockerfile.model_api ./docker-comp
 docker image build ./docker-compose/Database_Docker -t database_api:latest
 
 # Docker orquestration
-docker-compose -f docker-compose/docker-compose.yml up --remove-orphans
+docker-compose -f docker-compose/docker-compose.yml up --remove-orphans -d

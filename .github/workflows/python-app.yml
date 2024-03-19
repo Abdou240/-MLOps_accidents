@@ -40,3 +40,6 @@ jobs:
     - name: Run all containers
       run: |
         bash setup.sh
+
+    - name: Stop Docker containers
+      run: docker-compose down
