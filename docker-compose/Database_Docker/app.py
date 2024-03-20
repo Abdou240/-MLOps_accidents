@@ -188,17 +188,17 @@ class ManageUsersRequest(BaseModel):
 
 
 
-def check_admin_permission(username, password):
-    """Check if the user has admin permission."""
-    conn = get_db_connection()
-    with conn.cursor() as cursor:
-        cursor.execute("SELECT Permission FROM user_tab WHERE Username = %s AND Password = %s", (username, password))
-        permission_record = cursor.fetchone()
-    conn.close()
-    
-    if permission_record and permission_record[0].lower() == 'admin':
-        return True
-    return False
+#def check_admin_permission(username, password):
+#    """Check if the user has admin permission."""
+#    conn = get_db_connection()
+#    with conn.cursor() as cursor:
+#        cursor.execute("SELECT Permission FROM user_tab WHERE Username = %s AND Password = %s", (username, password))
+#        permission_record = cursor.fetchone()
+#    conn.close()
+#    
+#    if permission_record and permission_record[0].lower() == 'admin':
+#        return True
+#    return False
 
 
 def execute_user_action(action, current_username, target_username, target_password, target_permission):
@@ -208,7 +208,7 @@ def execute_user_action(action, current_username, target_username, target_passwo
     with conn.cursor() as cursor:
         if action == 'add':
             cursor.execute("INSERT INTO user_tab (Username, Password, Permission) VALUES (%s, %s, %s)", 
-                           (target_username, target_password, target_permission))
+                           (new_username, new_password, new_permission))
         elif action == 'delete':
         # First, check if the user exists
             cursor.execute("SELECT COUNT(*) FROM user_tab WHERE Username = %s", (current_username,))
