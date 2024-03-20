@@ -53,7 +53,7 @@ def get_runs_metrics():
         print('\t', 'Metrics: ', metrics)
     
         
-
+import sys
 
 # Retrieve container IDs from command-line arguments
 CONTAINER_ID_1 = sys.argv[1]
