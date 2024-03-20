@@ -10,7 +10,7 @@ endpoint = user = section = ''
 
 if nav == 'Project Presentations':
 
-	sections = ['1 - Introduction', '2 - Containerization', '3 - System orchestration', '4 - Future work']
+	sections = ['1 - Introduction', '2 - Containerization', '3 - Continuos Integration', '4 - Future work']
 	col1, col2 = menu.columns([1,8])
 	section = col2.radio('sections', sections, label_visibility='collapsed')
 
@@ -117,15 +117,6 @@ if nav == 'Project Presentations':
 		"""
 		)
 		st.divider()
-		st.header('MLflow model server')
-		st.markdown(
-		"""
-		The model making predictions
-		- Is saved and retrieved from Docker-hub
-		- MLflow models is used to make predictions
-		"""
-		)
-		st.divider()
 		st.header('FastAPI manager API')
 		st.markdown(
 		"""
@@ -144,8 +135,8 @@ if nav == 'Project Presentations':
 		"""
 		)
 
-	if section == '3 - System orchestration':
-		st.title('3 - System orchestration')
+	if section == '3 - Continuos Integration':
+		st.title('3 - Continuos Integration')
 		st.header('Workflow')
 		st.markdown(
 		"""
@@ -297,18 +288,18 @@ if nav == 'API Endpoints':
 						st.rerun()
 
 		if endpoint == '/model':
-			col1, col2 = st.columns([5, 1])
-			col1.subheader('Random Forest Classifier')
-			if col2.button('retrain'):
-				with st.spinner('Training model...'):
-					res = requests.post(f'http://api:8090{user}{endpoint}/retrain', json={'auth': auth})
-				if res.status_code != 200:
-					st.warning(res.json()['detail'], icon="⚠️")
-				else:
-					st.success('Model retrained successfully!', icon="✅")
 			with st.spinner('Pulling model stats...'):
+				col1, col2 = st.columns([5, 1])
+				col1.subheader('Random Forest Classifier')
+				if col2.button('retrain'):
+					with st.spinner('Training model...'):
+						res = requests.post(f'http://api:8090{user}{endpoint}/retrain', json={'auth': auth})
+					if res.status_code != 200:
+						st.warning(res.json()['detail'], icon="⚠️")
+					else:
+						st.success('Model retrained successfully!', icon="✅")
 				res = requests.get(f'http://api:8090{user}{endpoint}/stats', json={'auth': auth})
-				if res.status_code == 404:
+				if res.status_code != 200:
 					st.warning(res.json()['detail'], icon="⚠️")
 				else:
 					for key in res.json():
