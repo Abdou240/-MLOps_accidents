@@ -5,9 +5,9 @@ name: Test of system orchestration
 
 on:
   push:
-    branches: [ "daniel" ]
+    branches: "*"
   pull_request:
-    branches: [ "daniel" ]
+    branches: "*"
 
 permissions:
   contents: read
