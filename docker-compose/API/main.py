@@ -185,19 +185,50 @@ async def gen_stats(request: Request):
 			res = res.json()
 			columns = [x['column_name'] for x in res]
 			# get count (not nan), mean, std, min, 0.25, 0.5, 0.75, max
-			# Cou
+			# Count
 			query = [f'count({column}) as {column}' for column in columns]
 			gen_query = 'SELECT ' + ', '.join(query) + ' FROM dataset'
 			res = requests.post('http://database:9090/data', json={'query': gen_query})
 			stats['count'] = res.json()[0]
+			# Mean
 			query = [f'avg({column}) as {column}' for column in columns]
 			gen_query = 'SELECT ' + ', '.join(query) + ' FROM dataset'
 			res = requests.post('http://database:9090/data', json={'query': gen_query})
 			stats['mean'] = res.json()[0]
+			# STD
+			query = [f'round(stddev({column}), 2) as {column}' for column in columns]
+			gen_query = 'SELECT ' + ', '.join(query) + ' FROM dataset'
+			res = requests.post('http://database:9090/data', json={'query': gen_query})
+			stats['std'] = res.json()[0]
+			# min
+			query = [f'min({column}) as {column}' for column in columns]
+			gen_query = 'SELECT ' + ', '.join(query) + ' FROM dataset'
+			res = requests.post('http://database:9090/data', json={'query': gen_query})
+			stats['min'] = res.json()[0]
+			# 0.25 
+			query = [f'PERCENTILE_CONT(0.25) WITHIN GROUP (ORDER BY {column}) as {column}' for column in columns]
+			gen_query = 'SELECT ' + ', '.join(query) + ' FROM dataset'
+			res = requests.post('http://database:9090/data', json={'query': gen_query})
+			stats['0.25'] = res.json()[0]
+			# 0.5 
+			query = [f'PERCENTILE_CONT(0.5) WITHIN GROUP (ORDER BY {column}) as {column}' for column in columns]
+			gen_query = 'SELECT ' + ', '.join(query) + ' FROM dataset'
+			res = requests.post('http://database:9090/data', json={'query': gen_query})
+			stats['0.5'] = res.json()[0]
+			# 0.75 
+			query = [f'PERCENTILE_CONT(0.75) WITHIN GROUP (ORDER BY {column}) as {column}' for column in columns]
+			gen_query = 'SELECT ' + ', '.join(query) + ' FROM dataset'
+			res = requests.post('http://database:9090/data', json={'query': gen_query})
+			stats['0.75'] = res.json()[0]
+			# max
+			query = [f'max({column}) as {column}' for column in columns]
+			gen_query = 'SELECT ' + ', '.join(query) + ' FROM dataset'
+			res = requests.post('http://database:9090/data', json={'query': gen_query})
+			stats['max'] = res.json()[0]
 		except:
 			raise HTTPException(status_code=404, detail='Database not responding')
 		else:	
-			return res
+			return stats
 	# TODO query DB to get general stats on dataset
 
 @app.get("/superuser/stats_query")
