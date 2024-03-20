@@ -6,7 +6,171 @@ navigation = ['Project Presentations', 'API Endpoints']
 menu = st.sidebar.expander('Menu')
 
 nav = menu.radio('Menu', navigation, label_visibility='collapsed')
-endpoint = user = method = ''
+endpoint = user = section = ''
+
+if nav == 'Project Presentations':
+
+	sections = ['1 - Introduction', '2 - Containerization', '3 - System orchestration', '4 - Future work']
+	col1, col2 = menu.columns([1,8])
+	section = col2.radio('sections', sections, label_visibility='collapsed')
+
+	st.markdown('''
+	<style>
+	[data-testid="stMarkdownContainer"] ul{
+		list-style-position: inside;
+	}
+	</style>
+	''', unsafe_allow_html=True)
+
+
+	if section == '1 - Introduction':
+		st.title('1 - Introduction')
+		st.header('Context and Objectives')
+		st.markdown(
+		"""
+		What problem should the application address?
+		- In case of a car accident, how severe it could be for a user given the current conditions
+		"""
+		)
+		st.markdown(
+		"""
+		Who is the app sponsor?
+		- Local government of the municipalities
+		"""
+		)
+		st.markdown(
+		"""
+		Who will be the user of the application?
+		- Public entities / local population
+		"""
+		)
+		st.markdown(
+		"""
+		Who will be the application administrator?
+		- A government entity - E.g. Civil defense
+		"""
+		)
+		st.markdown(
+		"""
+		Objective
+		- Develop a system that predicts the severity of a car accident given some features
+		- The system is built by containerized microservices
+		"""
+		)
+		st.divider()
+		st.header('Implementation Overview')
+		st.markdown(
+		"""
+		Technologies used:
+		- Model from scikit learn - Random Forest Classifier - Multiclass
+		- PostgreSQL for hosting the DB
+		- FastAPI for custom APIs
+		- Streamlit for UI
+		"""
+		)
+		st.image('containers.png')
+
+	if section == '2 - Containerization':
+		st.title('2 - Containerization')
+		st.image('diagram.png')
+		st.divider()
+		st.header('FastAPI PostgreSQL database API')
+		st.markdown(
+		"""
+		- Database Overview: Utilizes a PostgreSQL database for streamlined storage of clean, preprocessed data in a single table.
+		- Table Structure Creation: Focuses on developing the table's layout, specifying data types and fields for comprehensive data organization.
+		- Model Requests: Enables the retrieval of specific data sets for model-driven analytics upon request.
+		- Appending New Data: Details the methodology for admin users to incorporate new data, highlighting the importance of maintaining data integrity.
+		- Query Execution: Describes the ability to execute intricate queries and provide insights, such as pinpointing demographic-specific risk areas under certain weather conditions.
+		- User Table Definition: Establishes a User Table to ensure secure data access and manipulation by verified users.
+		- User Table Update: Expands functionalities for authorized admin users to update, add, or delete user information, enhancing control over access rights.
+
+		"""
+		)
+		st.divider()
+		st.header('FastAPI model training API')
+		st.markdown(
+		"""
+		Receives model training requests with hyperparameters
+		- Reads model code from shared volume
+		- Requests data from DB container
+		- Retrains the model and saves it in the volume
+		"""
+		)
+		st.divider()
+		st.header('MLflow server API')
+		st.markdown(
+		"""
+		Provides metrics from pretrained models
+		- Reads metrics from the shared volume
+		- Uses Python API
+		Provides MLflow server’s web interface for visualization
+		"""
+		)
+		st.divider()
+		st.header('MLflow model server')
+		st.markdown(
+		"""
+		The model making predictions
+		- Is saved and retrieved from Docker-hub
+		- MLflow models is used to make predictions
+		"""
+		)
+		st.divider()
+		st.header('MLflow model server')
+		st.markdown(
+		"""
+		The model making predictions
+		- Is saved and retrieved from Docker-hub
+		- MLflow models is used to make predictions
+		"""
+		)
+		st.divider()
+		st.header('FastAPI manager API')
+		st.markdown(
+		"""
+		- Central API to receive requests from frontend
+		- Reworks and redirects front end requests to appropriate microservice
+		- Return data in appropriate format for frontend to use
+		- Users must authenticate to access certain endpoints (Admin, Superuser)
+		"""
+		)
+		st.divider()
+		st.header('Streamlit web app')
+		st.markdown(
+		"""
+		- Frontend for UI
+		- This is how the model is used and administered
+		"""
+		)
+
+	if section == '3 - System orchestration':
+		st.title('3 - System orchestration')
+		st.header('Workflow')
+		st.markdown(
+		"""
+		- Runs all containers (Docker-compose)
+		- Makes requests for all containers
+		"""
+		)
+
+	if section == '4 - Future work':
+		st.title('4 - Future work')
+		st.header('Mechanism to place new data is missing')
+		st.markdown(
+		"""
+		- The mechanism to update the DB is ready
+		- The mechanism to retrain models is ready
+		"""
+		)
+		st.divider()
+		st.header('Update the best performing data is missing')
+		st.markdown(
+		"""
+		- The serving model is currently on docker-hub
+		"""
+		)
+
 if nav == 'API Endpoints':
 	col1, col2 = menu.columns([1,8])
 	users = ['/admin', '/superuser', '/gen_user', '/status']
@@ -167,8 +331,8 @@ if nav == 'API Endpoints':
 			search = st.button('get')
 			if search:
 				res = requests.get(f'http://api:8090{user}{endpoint}', json={'auth': auth})
-				if res.status_code == 404:
-					st.warning(res.json()['detail'], icon="⚠️")
+				if res.status_code != 200:
+					st.warning(res.json()['detail'])
 				else:
 					st.subheader('General Stats')
 					st.write(res.json())
@@ -178,8 +342,8 @@ if nav == 'API Endpoints':
 			search = st.button('Search')
 			if search:
 				res = requests.get(f'http://api:8090{user}{endpoint}', json={'auth': auth, 'query': query})
-				if res.status_code == 404:
-					st.warning(res.json()['detail'], icon="⚠️")
+				if res.status_code != 200:
+					st.warning(res.json()['detail'])
 				else:
 					st.subheader('Query Response')
 					st.write(res.json())
