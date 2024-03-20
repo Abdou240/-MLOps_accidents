@@ -64,5 +64,5 @@ CONTAINER_ID_4 = sys.argv[4]
 CONTAINER_ID_5 = sys.argv[5]
 CONTAINER_ID_6 = sys.argv[6]
 check_model_api_status()
-retrain_model()
+#retrain_model()
 get_runs_metrics()
