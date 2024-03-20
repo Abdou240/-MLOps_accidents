@@ -54,6 +54,7 @@ def get_runs_metrics():
     
         
 import sys
+print(sys.argv)
 
 # Retrieve container IDs from command-line arguments
 CONTAINER_ID_1 = sys.argv[1]
