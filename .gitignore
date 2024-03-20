@@ -116,3 +116,6 @@ docker-compose/mlflow/data/raw/caracteristiques-2021.csv
 docker-compose/mlflow/data/raw/lieux-2021.csv
 docker-compose/mlflow/data/raw/usagers-2021.csv
 docker-compose/mlflow/data/raw/vehicules-2021.csv
+setup_local.sh
+.github/workflows/python-app-1-container.yml
+setup-1-container.sh

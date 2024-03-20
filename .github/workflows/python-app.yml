@@ -41,12 +41,12 @@ jobs:
       run: |
         bash setup.sh
         sleep 10  # Wait for the container to start
-        export CONTAINER_ID_1=$(docker-compose ps -q model)
-        export CONTAINER_ID_2=$(docker-compose ps -q mlflow)
-        export CONTAINER_ID_3=$(docker-compose ps -q model_api)
-        export CONTAINER_ID_4=$(docker-compose ps -q api)
-        export CONTAINER_ID_5=$(docker-compose ps -q streamlit)
-        export CONTAINER_ID_6=$(docker-compose ps -q database)
+        export CONTAINER_ID_1=$(docker-compose -f docker-compose/docker-compose.yml ps -q model)
+        export CONTAINER_ID_2=$(docker-compose -f docker-compose/docker-compose.yml ps -q mlflow)
+        export CONTAINER_ID_3=$(docker-compose -f docker-compose/docker-compose.yml ps -q model_api)
+        export CONTAINER_ID_4=$(docker-compose -f docker-compose/docker-compose.yml ps -q api)
+        export CONTAINER_ID_5=$(docker-compose -f docker-compose/docker-compose.yml ps -q streamlit)
+        export CONTAINER_ID_6=$(docker-compose -f docker-compose/docker-compose.yml ps -q database)
 
     - name: Run curl tests
       run: |
