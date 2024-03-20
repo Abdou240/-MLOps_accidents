@@ -68,11 +68,11 @@ if nav == 'Project Presentations':
 		- Streamlit for UI
 		"""
 		)
-		st.image('containers.png')
+		st.image('diagram.png')
 
 	if section == '2 - Containerization':
 		st.title('2 - Containerization')
-		st.image('diagram.png')
+		st.image('containers.png')
 		st.divider()
 		st.header('FastAPI PostgreSQL database API')
 		st.markdown(
