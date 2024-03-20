@@ -177,67 +177,82 @@ initialize_application()
 
 
 class ManageUsersRequest(BaseModel):
-    username: str
-    password: str
+   # username: str
+  #  password: str
     action: str
-    target_username: str = ''
-    new_password: str = ''
-    new_permission: str = ''
-    new_username: str = ''
+
+    current_username: str = ''  # Existing username of the user to modify
+    target_username: str = ''  # New desired username for the user
+    target_password: str = ''
+    target_permission: str = ''
 
 
 
-def check_admin_permission(username, password):
-    """Check if the user has admin permission."""
-    conn = get_db_connection()
-    with conn.cursor() as cursor:
-        cursor.execute("SELECT Permission FROM user_tab WHERE Username = %s AND Password = %s", (username, password))
-        permission_record = cursor.fetchone()
-    conn.close()
-    
-    if permission_record and permission_record[0].lower() == 'admin':
-        return True
-    return False
+#def check_admin_permission(username, password):
+#    """Check if the user has admin permission."""
+#    conn = get_db_connection()
+#    with conn.cursor() as cursor:
+#        cursor.execute("SELECT Permission FROM user_tab WHERE Username = %s AND Password = %s", (username, password))
+#        permission_record = cursor.fetchone()
+#    conn.close()
+#    
+#    if permission_record and permission_record[0].lower() == 'admin':
+#        return True
+#    return False
 
-def execute_user_action(action, target_username, new_password, new_permission, new_username):
+
+def execute_user_action(action, current_username, target_username, target_password, target_permission):
+
     """Execute the specified action for user management."""
     conn = get_db_connection()
     with conn.cursor() as cursor:
         if action == 'add':
             cursor.execute("INSERT INTO user_tab (Username, Password, Permission) VALUES (%s, %s, %s)", 
-                           (new_username, new_password, new_permission))
+                           (target_username, target_password, target_permission))
         elif action == 'delete':
         # First, check if the user exists
-            cursor.execute("SELECT COUNT(*) FROM user_tab WHERE Username = %s", (target_username,))
+            cursor.execute("SELECT COUNT(*) FROM user_tab WHERE Username = %s", (current_username,))
             if cursor.fetchone()[0] == 0:
         # User does not exist, so cannot delete
                 raise HTTPException(status_code=404, detail="User not found, cannot delete")
             else:
         # User exists, proceed with deletion
-                cursor.execute("DELETE FROM user_tab WHERE Username = %s", (target_username,))
+                cursor.execute("DELETE FROM user_tab WHERE Username = %s", (current_username,))
         elif action == 'modify':
         # First, check if the user exists
-            cursor.execute("SELECT COUNT(*) FROM user_tab WHERE Username = %s", (target_username,))
+            cursor.execute("SELECT COUNT(*) FROM user_tab WHERE Username = %s", (current_username,))
             if cursor.fetchone()[0] == 0:
         # User does not exist, so cannot modify
                 raise HTTPException(status_code=404, detail="User not found, cannot modify")
             else:
         # User exists, proceed with modification
-                cursor.execute("UPDATE user_tab SET Username = %s Password = %s, Permission = %s WHERE Username = %s", (new_username, new_password, new_permission, target_username))
+
+                #cursor.execute("UPDATE user_tab SET Password = %s, Permission = %s WHERE Username = %s", (target_password, target_permission, target_username))
+                cursor.execute("UPDATE user_tab SET Username = %s, Password = %s, Permission = %s WHERE Username = %s", (target_username, target_password, target_permission, current_username))
+
         conn.commit()
     conn.close()
 
 @app.post("/admin/manage_users")
 async def manage_users(request_data: ManageUsersRequest):
-    if not request_data.username or not request_data.password:
-        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Missing credentials")
+   # if not request_data.username or not request_data.password:
+   #     raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Missing credentials")
 
-    if not check_admin_permission(request_data.username, request_data.password):
-        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Unauthorized")
+  #  if not check_admin_permission(request_data.username, request_data.password):
+  #      raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Unauthorized")
 
     try:
-        execute_user_action(request_data.action, request_data.target_username, request_data.new_password, request_data.new_permission, request_data.new_username)
-        message = f"Action '{request_data.action}' completed successfully for user: {request_data.target_username}"
+        execute_user_action(
+            request_data.action,
+            request_data.current_username,
+            request_data.target_username,
+            request_data.target_password,
+            request_data.target_permission
+        )
+        message = f"Action '{request_data.action}' completed successfully."
+    except HTTPException as http_exc:
+        raise http_exc
+
     except Exception as e:
         raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail=f"Error executing '{request_data.action}': {str(e)}")
 
