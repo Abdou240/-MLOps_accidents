@@ -19,3 +19,4 @@ joblib
 #sys
 #json
 mlflow
+requests
