@@ -141,7 +141,7 @@ if nav == 'Project Presentations':
 		st.markdown(
 		"""
 		- Runs all containers (Docker-compose)
-		- Makes requests for all containers
+		- Integration tests - Curl commands and requests from python scripts
 		"""
 		)
 
