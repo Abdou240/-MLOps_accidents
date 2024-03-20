@@ -179,9 +179,21 @@ async def gen_stats(request: Request):
 		raise HTTPException(status_code=404, detail=f'{err}')
 	else:
 		try:
-			gen_query = 'SELECT COUNT(catu) FROM dataset'
+			stats = {}
+			gen_query = 'SELECT column_name FROM information_schema.columns where table_name = \'dataset\''
 			res = requests.post('http://database:9090/data', json={'query': gen_query})
 			res = res.json()
+			columns = [x['column_name'] for x in res]
+			# get count (not nan), mean, std, min, 0.25, 0.5, 0.75, max
+			# Cou
+			query = [f'count({column}) as {column}' for column in columns]
+			gen_query = 'SELECT ' + ', '.join(query) + ' FROM dataset'
+			res = requests.post('http://database:9090/data', json={'query': gen_query})
+			stats['count'] = res.json()[0]
+			query = [f'avg({column}) as {column}' for column in columns]
+			gen_query = 'SELECT ' + ', '.join(query) + ' FROM dataset'
+			res = requests.post('http://database:9090/data', json={'query': gen_query})
+			stats['mean'] = res.json()[0]
 		except:
 			raise HTTPException(status_code=404, detail='Database not responding')
 		else:	
