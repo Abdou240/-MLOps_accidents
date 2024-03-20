@@ -20,3 +20,4 @@ joblib
 #json
 mlflow
 requests
+pytest
