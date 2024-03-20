@@ -319,14 +319,16 @@ if nav == 'API Endpoints':
 
 	if user == '/superuser':
 		if endpoint == '/gen_stats':
-			search = st.button('get')
-			if search:
-				res = requests.get(f'http://api:8090{user}{endpoint}', json={'auth': auth})
-				if res.status_code != 200:
-					st.warning(res.json()['detail'])
-				else:
-					st.subheader('General Stats')
-					st.write(res.json())
+			search = st.button('Get Stats')
+			with st.spinner('Fishing for stats...'):
+				if search:
+					res = requests.get(f'http://api:8090{user}{endpoint}', json={'auth': auth})
+					if res.status_code != 200:
+						st.warning(res.json()['detail'])
+					else:
+						st.subheader('Table: dataset')
+						df = pd.DataFrame(res.json().values(), index=res.json().keys()).round(2)
+						st.write(df)
 
 		if endpoint == '/stats_query':
 			query = st.text_input('SQL Query', value='')

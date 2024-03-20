@@ -196,7 +196,7 @@ async def gen_stats(request: Request):
 			res = requests.post('http://database:9090/data', json={'query': gen_query})
 			stats['mean'] = res.json()[0]
 			# STD
-			query = [f'round(stddev({column}), 2) as {column}' for column in columns]
+			query = [f'stddev({column}) as {column}' for column in columns]
 			gen_query = 'SELECT ' + ', '.join(query) + ' FROM dataset'
 			res = requests.post('http://database:9090/data', json={'query': gen_query})
 			stats['std'] = res.json()[0]
