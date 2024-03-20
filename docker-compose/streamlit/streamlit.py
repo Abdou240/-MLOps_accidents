@@ -327,7 +327,7 @@ if nav == 'API Endpoints':
 						st.warning(res.json()['detail'])
 					else:
 						st.subheader('Table: dataset')
-						df = pd.DataFrame(res.json().values(), index=res.json().keys())
+						df = pd.DataFrame(res.json().values(), index=res.json().keys()).round(2)
 						st.write(df)
 
 		if endpoint == '/stats_query':
