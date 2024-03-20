@@ -77,13 +77,14 @@ if nav == 'Project Presentations':
 		st.header('FastAPI PostgreSQL database API')
 		st.markdown(
 		"""
-		- Database Overview: Utilizes a PostgreSQL database for streamlined storage of clean, preprocessed data in a single table.
-		- Table Structure Creation: Focuses on developing the table's layout, specifying data types and fields for comprehensive data organization.
-		- Model Requests: Enables the retrieval of specific data sets for model-driven analytics upon request.
-		- Appending New Data: Details the methodology for admin users to incorporate new data, highlighting the importance of maintaining data integrity.
-		- Query Execution: Describes the ability to execute intricate queries and provide insights, such as pinpointing demographic-specific risk areas under certain weather conditions.
-		- User Table Definition: Establishes a User Table to ensure secure data access and manipulation by verified users.
-		- User Table Update: Expands functionalities for authorized admin users to update, add, or delete user information, enhancing control over access rights.
+		- Database Configuration: Optimizes data storage in a PostgreSQL database with a single, easy-to-access table.
+		- Table Blueprint: Designs the table structure, choosing data types and fields for efficient data arrangement.
+		- Data Fetching: Implements fast data retrieval systems for model analytics.
+		- Data Update: Facilitates the integration of new data into the database while maintaining its integrity.
+		- Query Handling: Enables the system to run complex queries for actionable insights on various risk factors.
+		- Access Security: Creates a User Table to ensure data is handled securely by approved users
+		- Permission Control: Streamlines admin processes to manage user access rights effectively.
+		- Reliability Assurance: Strengthens database operations with comprehensive unit testing, from connectivity to user data management.
 
 		"""
 		)
