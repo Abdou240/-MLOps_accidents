@@ -140,10 +140,12 @@ if nav == 'Project Presentations':
 		st.header('Workflow')
 		st.markdown(
 		"""
+		- Pytest for DB
 		- Runs all containers (Docker-compose)
 		- Integration tests - Curl commands and requests from python scripts
 		"""
 		)
+		st.image('integration.jpeg')
 
 	if section == '4 - Future work':
 		st.title('4 - Future work')
